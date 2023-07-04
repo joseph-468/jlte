@@ -1,7 +1,5 @@
-#include <sys/ioctl.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <stdio.h>
+#include <curses.h>
 
 typedef struct Line {
 	char *data;
@@ -9,15 +7,7 @@ typedef struct Line {
 	struct Line *prev;
 } Line;
 
-void getTerminalSize(int *tWidth, int *tHeight);
 void insertLine(Line *currentLine);
-
-void getTerminalSize(int *tWidth, int *tHeight) {
-	struct winsize size;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-	*tWidth = size.ws_col;
-	*tHeight = size.ws_row;
-}
 
 void insertLine(Line *currentLine) {
 	Line newLine;
@@ -28,11 +18,38 @@ void insertLine(Line *currentLine) {
 }
 
 int main(int argc, char *argv[]) {
-	// Important variables
-	int tWidth, tHeight;
+	// Important startup
+	initscr();
+	if (!has_colors) {
+		printw("Fuck off lad. No one even wants you here");
+		return -1;
+	}
+	start_color();
+	cbreak();
+	noecho();
+	WINDOW *win = newwin(8, 16, 0, 0); // Y, X, Y, X
+	char ch = '\0'; 
+	int y, x;
 	Line fileHead = {malloc(8), NULL, NULL};
 	Line *currentLine;
-	currentLine = &fileHead;
+	currentLine = &fileHead;	
+	refresh();
+	box(win, 0, 0);	
+	wrefresh(win);
 
+	// Middle stuff
+	init_pair(1, COLOR_GREEN, COLOR_BLACK);
+	wattron(win, COLOR_PAIR(1));
+	while (1) {
+		ch = getch();
+		getyx(win, y, x);
+		mvwprintw(win, y, x, "%c", ch);
+		wrefresh(win);
+	}
+
+	// Important end stuff
+	getch();
+	wattroff(win, COLOR_PAIR(1));
+	endwin();
 	return 0;
 }
