@@ -18,30 +18,34 @@ void insertLine(Line *currentLine) {
 }
 
 int main(int argc, char *argv[]) {
-	// Important startup
+	// Start ncurses
 	initscr();
+	cbreak();
+	noecho();
 	if (!has_colors) {
 		printw("Fuck off lad. No one even wants you here");
 		return -1;
 	}
 	start_color();
-	cbreak();
-	noecho();
-	WINDOW *win = newwin(8, 16, 0, 0); // Y, X, Y, X
-	char ch = '\0'; 
+	// Create window
 	int y, x;
-	Line fileHead = {malloc(8), NULL, NULL};
-	Line *currentLine;
-	currentLine = &fileHead;	
+	getmaxyx(stdscr, y, x);
+	WINDOW *win = newwin(y, x, 0, 0); // Y, X, Y, X
 	refresh();
 	box(win, 0, 0);	
 	wrefresh(win);
+	// Startup variables
+	int ch = '\0'; 
+	Line fileHead = {malloc(8), NULL, NULL};
+	Line *currentLine;
+	currentLine = &fileHead;	
 
 	// Middle stuff
+	keypad(win, true);
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
 	wattron(win, COLOR_PAIR(1));
 	while (1) {
-		ch = getch();
+		ch = wgetch(win);
 		getyx(win, y, x);
 		mvwprintw(win, y, x, "%c", ch);
 		wrefresh(win);
