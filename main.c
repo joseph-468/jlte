@@ -22,8 +22,9 @@ int main(int argc, char *argv[]) {
 	initscr();
 	cbreak();
 	noecho();
-	if (!has_colors) {
+	if (!has_colors || !can_change_color()) {
 		printw("Fuck off lad. No one even wants you here");
+		endwin();
 		return -1;
 	}
 	start_color();
@@ -32,7 +33,6 @@ int main(int argc, char *argv[]) {
 	getmaxyx(stdscr, y, x);
 	WINDOW *win = newwin(y-1, x, 0, 0); // Y, X, Y, X
 	box(win, 0, 0);	
-	keypad(win, true);
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);
 	wattron(win, COLOR_PAIR(1));
 	wrefresh(win);
@@ -43,9 +43,8 @@ int main(int argc, char *argv[]) {
 	currentLine = &fileHead;	
 	// Bottom Bar setup
 	WINDOW *bar = newwin(1, x, y-1, 0);
-	init_color(24, 289, 211, 735);
-	init_pair(2, 24, 24);
-	wattron(bar, COLOR_PAIR(2));
+	init_color(17, 289, 211, 735);
+	init_pair(2, 17, 17);
 	wbkgd(bar, COLOR_PAIR(2));
 	wrefresh(bar);
 
@@ -59,7 +58,6 @@ int main(int argc, char *argv[]) {
 
 	// Important end stuff
 	getch();
-	wattroff(win, COLOR_PAIR(1));
 	endwin();
 	return 0;
 }
