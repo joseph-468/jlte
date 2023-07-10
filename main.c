@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 	wattron(win, COLOR_PAIR(1));
 	wrefresh(win);
 	// Startup variables
-	int ch = '\0'; 
+	int ch; 
 	Line *fileHead = malloc(sizeof(Line));
 	fileHead->next = NULL;
 	fileHead->prev = NULL;
