@@ -12,11 +12,11 @@ void insertLine(Line *currentLine);
 int openFile();
 
 void insertLine(Line *currentLine) {
-	Line newLine;
-	newLine.data = malloc(8);
-	newLine.next = NULL;
-	newLine.prev = currentLine;
-	currentLine->next = &newLine;
+	Line *newLine = malloc(sizeof(Line));
+	newLine->data = malloc(8);
+	newLine->next = NULL;
+	newLine->prev = currentLine;
+	currentLine->next = newLine;
 }
 
 int openFile(WINDOW *win, WINDOW *bar) {
@@ -89,7 +89,10 @@ int main(int argc, char *argv[]) {
 	wrefresh(win);
 	// Startup variables
 	int ch = '\0'; 
-	Line fileHead = {malloc(8), NULL, NULL};
+	Line fileHead = malloc(sizeof(Line));
+	fileHead.next = NULL;
+	fileHead.prev = NULL;
+	fileHead.data = malloc(8);
 	Line *currentLine;
 	currentLine = &fileHead;	
 	// Bottom Bar setup
