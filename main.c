@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <curses.h>
 #define ctrl(x) ((x) & 0x1f)
+#define ASCII_BACKSPACE 127
+#define ASCII_ENTER 10
 
 typedef struct Line {
 	char *data;
@@ -32,7 +34,7 @@ int openFile(WINDOW *win, WINDOW *bar) {
 	while (1) {
 		ch = wgetch(win);
 		getyx(bar, y, x);
-		if (ch == 10) {
+		if (ch == ASCII_ENTER) {
 			mvwprintw(win, 0, 8, "%s", fileName);
 			wrefresh(win);
 			FILE *fptr = fopen(fileName, "r");
@@ -40,20 +42,21 @@ int openFile(WINDOW *win, WINDOW *bar) {
 				wclear(bar);
 				mvwprintw(bar, 0, 0, "File not found");
 				wrefresh(bar);
+				fclose(fptr);
 				return -1; // Failure
 			}
 			else {
 				char lineTest[1000];
 				wclear(bar);
 				mvwprintw(bar, 0, 0, "File opened");
-				fscanf(fptr, "%s", lineTest);
+				fscanf(fptr, "%s", lineTest); // Temporary. Only meant to look for first word
 				mvwprintw(win, 2, 2, "%s", lineTest);
 				wrefresh(bar);
 				return 0; // Sucess
 			}
 		}
-		else if (ch == 127) {
-			if (startX < x) {
+		else if (ch == ASCII_BACKSPACE) {
+			if (startX < x) { 
 				i -= 1;
 				fileName[i] = '\0';
 				mvwdelch(bar, y, x-1);
@@ -89,12 +92,12 @@ int main(int argc, char *argv[]) {
 	wrefresh(win);
 	// Startup variables
 	int ch = '\0'; 
-	Line fileHead = malloc(sizeof(Line));
-	fileHead.next = NULL;
-	fileHead.prev = NULL;
-	fileHead.data = malloc(8);
+	Line *fileHead = malloc(sizeof(Line));
+	fileHead->next = NULL;
+	fileHead->prev = NULL;
+	fileHead->data = malloc(8);
 	Line *currentLine;
-	currentLine = &fileHead;	
+	currentLine = fileHead;	
 	// Bottom Bar setup
 	WINDOW *bar = newwin(1, x, y-1, 0);
 	init_color(17, 289, 211, 735);
