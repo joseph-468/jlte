@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <curses.h>
+
 #define ctrl(x) ((x) & 0x1f)
 #define ASCII_BACKSPACE 127
 #define ASCII_ENTER 10
@@ -11,7 +12,8 @@ typedef struct Line {
 } Line;
 
 void insertLine(Line *currentLine);
-int openFile();
+FILE * openFile(WINDOW *win, WINDOW *bar);
+void saveFile(FILE *currentFile, WINDOW *win, WINDOW *bar);
 
 void insertLine(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
@@ -21,7 +23,7 @@ void insertLine(Line *currentLine) {
 	currentLine->next = newLine;
 }
 
-int openFile(WINDOW *win, WINDOW *bar) {
+FILE * openFile(WINDOW *win, WINDOW *bar) {
 	wclear(bar);
 	mvwprintw(bar, 0, 0, "Open file: ");
 	short y, x;
@@ -42,8 +44,7 @@ int openFile(WINDOW *win, WINDOW *bar) {
 				wclear(bar);
 				mvwprintw(bar, 0, 0, "File not found");
 				wrefresh(bar);
-				fclose(fptr);
-				return -1; // Failure
+				return NULL; // Failure
 			}
 			else {
 				char lineTest[1000];
@@ -52,7 +53,8 @@ int openFile(WINDOW *win, WINDOW *bar) {
 				fscanf(fptr, "%s", lineTest); // Temporary. Only meant to look for first word
 				mvwprintw(win, 2, 2, "%s", lineTest);
 				wrefresh(bar);
-				return 0; // Sucess
+				fclose(fptr);
+				return fptr; // Sucess
 			}
 		}
 		else if (ch == ASCII_BACKSPACE) {
@@ -71,11 +73,21 @@ int openFile(WINDOW *win, WINDOW *bar) {
 	}
 }
 
+void saveFile(FILE *currentFile, WINDOW *win, WINDOW *bar) {
+	if (currentFile == NULL) {
+		wclear(bar);
+		mvwprintw(bar, 0, 0, "No file is currently open");
+		wrefresh(bar);
+		return;
+	}
+}
+
 int main(int argc, char *argv[]) {
 	// Start ncurses
 	initscr();
 	cbreak();
 	noecho();
+	raw();
 	if (!has_colors || !can_change_color()) {
 		printw("Fuck off lad. No one even wants you here");
 		endwin();
@@ -91,6 +103,7 @@ int main(int argc, char *argv[]) {
 	wattron(win, COLOR_PAIR(1));
 	wrefresh(win);
 	// Startup variables
+	FILE *currentFile = NULL;
 	int ch; 
 	Line *fileHead = malloc(sizeof(Line));
 	fileHead->next = NULL;
@@ -112,9 +125,18 @@ int main(int argc, char *argv[]) {
 		ch = wgetch(win);
 		getyx(win, y, x);
 		if (ch == ctrl('o')) {
-			openFile(win, bar);
+			currentFile = openFile(win, bar);
+		} 
+		else if (ch == ctrl('s')) {
+			saveFile(currentFile, win, bar);
 		}
-		mvwprintw(win, y, x, "%c", ch);
+		else if (ch == ctrl('c')) {
+			endwin();
+			return 0;
+		}
+		else {
+			mvwprintw(win, y, x, "%c", ch);
+		}
 		wrefresh(win);
 	}
 	
