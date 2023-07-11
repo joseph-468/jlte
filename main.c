@@ -12,16 +12,35 @@ typedef struct Line {
 	struct Line *prev;
 } Line;
 
-void insertLine(Line *currentLine);
+void insertLineAfter(Line *currentLine);
+void insertLineBefore(Line *currentLine);
 char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar);
 void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar);
 
-void insertLine(Line *currentLine) {
+void insertLineAfter(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
 	newLine->data = malloc(100);
-	newLine->next = NULL;
+	if (currentLine->next != NULL) {
+		newLine->next = currentLine->next;
+	}
+	else {
+		newLine->next = NULL;
+	}
 	newLine->prev = currentLine;
 	currentLine->next = newLine;
+}
+
+void insertLineBefore(Line *currentLine) {
+	Line *newLine = malloc(sizeof(Line));
+	newLine->data = malloc(100);
+	if (currentLine->prev != NULL) {
+		newLine->prev = currentLine->prev;
+	}
+	else {
+		newLine->prev = NULL;
+	}
+	newLine->next = currentLine;
+	currentLine->prev = newLine;
 }
 
 char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
@@ -56,7 +75,7 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 				// Append to list
 				char string[100];
 				while(fgets(string, 100, fptr)) {
-					insertLine(currentLine);
+					insertLineAfter(currentLine);
 					strcpy(currentLine->data, string);
 					currentLine = currentLine->next;
 				}
@@ -174,6 +193,11 @@ int main(int argc, char *argv[]) {
 		else if (ch == ctrl('c')) {
 			endwin();
 			return 0;
+		}
+		// Test button
+		else if (ch == ctrl('t')) {
+			insertLineBefore(fileHead);
+			fileHead = fileHead->prev;
 		}
 		else if (ch == ctrl('p')) {
 			// Print out full file
