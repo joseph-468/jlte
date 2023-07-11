@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <curses.h>
+#include <string.h>
 
 #define ctrl(x) ((x) & 0x1f)
 #define ASCII_BACKSPACE 127
@@ -12,18 +13,18 @@ typedef struct Line {
 } Line;
 
 void insertLine(Line *currentLine);
-FILE * openFile(WINDOW *win, WINDOW *bar);
-void saveFile(FILE *currentFile, WINDOW *win, WINDOW *bar);
+char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar);
+void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar);
 
 void insertLine(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
-	newLine->data = malloc(8);
+	newLine->data = malloc(100);
 	newLine->next = NULL;
 	newLine->prev = currentLine;
 	currentLine->next = newLine;
 }
 
-FILE * openFile(WINDOW *win, WINDOW *bar) {
+char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 	wclear(bar);
 	mvwprintw(bar, 0, 0, "Open file: ");
 	short y, x;
@@ -47,14 +48,22 @@ FILE * openFile(WINDOW *win, WINDOW *bar) {
 				return NULL; // Failure
 			}
 			else {
-				char lineTest[1000];
+				char *fileNamePointer = malloc(strlen(fileName));
+				strcpy(fileNamePointer, fileName);
+				char lineTest[100];
 				wclear(bar);
 				mvwprintw(bar, 0, 0, "File opened");
-				fscanf(fptr, "%s", lineTest); // Temporary. Only meant to look for first word
-				mvwprintw(win, 2, 2, "%s", lineTest);
+				// Append to list
+				char string[100];
+				while(fgets(string, 100, fptr)) {
+					insertLine(currentLine);
+					strcpy(currentLine->data, string);
+					currentLine = currentLine->next;
+				}
+				// Exit function
 				wrefresh(bar);
 				fclose(fptr);
-				return fptr; // Sucess
+				return fileNamePointer; // Sucess
 			}
 		}
 		else if (ch == ASCII_BACKSPACE) {
@@ -73,13 +82,20 @@ FILE * openFile(WINDOW *win, WINDOW *bar) {
 	}
 }
 
-void saveFile(FILE *currentFile, WINDOW *win, WINDOW *bar) {
+void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar) {
 	if (currentFile == NULL) {
 		wclear(bar);
 		mvwprintw(bar, 0, 0, "No file is currently open");
 		wrefresh(bar);
 		return;
 	}
+	FILE *fptr = fopen(currentFile, "w");;
+	Line *linePointer = fileHead;
+	while (linePointer->next != NULL) {
+		fprintf(fptr, "%s", linePointer->data);
+		linePointer = linePointer->next;
+	}
+	fclose(fptr);
 }
 
 int main(int argc, char *argv[]) {
@@ -103,12 +119,12 @@ int main(int argc, char *argv[]) {
 	wattron(win, COLOR_PAIR(1));
 	wrefresh(win);
 	// Startup variables
-	FILE *currentFile = NULL;
+	char *currentFile = NULL;
 	int ch; 
 	Line *fileHead = malloc(sizeof(Line));
 	fileHead->next = NULL;
 	fileHead->prev = NULL;
-	fileHead->data = malloc(8);
+	fileHead->data = malloc(100);
 	Line *currentLine;
 	currentLine = fileHead;	
 	// Bottom Bar setup
@@ -125,14 +141,22 @@ int main(int argc, char *argv[]) {
 		ch = wgetch(win);
 		getyx(win, y, x);
 		if (ch == ctrl('o')) {
-			currentFile = openFile(win, bar);
+			currentFile = openFile(fileHead, win, bar);
 		} 
 		else if (ch == ctrl('s')) {
-			saveFile(currentFile, win, bar);
+			saveFile(currentFile, fileHead, win, bar);
 		}
 		else if (ch == ctrl('c')) {
 			endwin();
 			return 0;
+		}
+		else if (ch == ctrl('p')) {
+			// Print out full file
+			Line *dog = fileHead;
+			while (dog->next != NULL) {
+				wprintw(win, "\n%s", dog->data);
+				dog = dog->next;
+			}
 		}
 		else {
 			mvwprintw(win, y, x, "%c", ch);
