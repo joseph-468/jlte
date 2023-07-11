@@ -43,9 +43,9 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 			FILE *fptr = fopen(fileName, "r");
 			if (fptr == NULL) {
 				wclear(bar);
-				mvwprintw(bar, 0, 0, "File not found");
+				mvwprintw(bar, 0, 0, "Error opening file");
 				wrefresh(bar);
-				return NULL; // Failure
+				return NULL;
 			}
 			else {
 				char *fileNamePointer = malloc(strlen(fileName));
@@ -62,7 +62,12 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 				}
 				// Exit function
 				wrefresh(bar);
-				fclose(fptr);
+				if (fclose(fptr) != 0) {
+					wclear(bar);
+					mvwprintw(bar, 0, 0, "Error closing file");
+					wrefresh(bar);
+					return NULL;
+				}
 				return fileNamePointer; // Sucess
 			}
 		}
@@ -89,13 +94,33 @@ void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar) {
 		wrefresh(bar);
 		return;
 	}
-	FILE *fptr = fopen(currentFile, "w");;
+	FILE *fptr = fopen(currentFile, "w");
+	if (fptr == NULL) {
+		wclear(bar);
+		mvwprintw(bar, 0, 0, "Error opening file");
+		wrefresh(bar);
+		return;
+	}
 	Line *linePointer = fileHead;
 	while (linePointer->next != NULL) {
-		fprintf(fptr, "%s", linePointer->data);
+		if (fprintf(fptr, "%s", linePointer->data) < 0) {
+			wclear(bar);
+			mvwprintw(bar, 0, 0, "Error writing to file");
+			wrefresh(bar);
+			fclose(fptr);
+			return;	
+		}
 		linePointer = linePointer->next;
 	}
-	fclose(fptr);
+	if (fclose(fptr) != 0) {
+		wclear(bar);
+		mvwprintw(bar, 0, 0, "Error closing file");
+		wrefresh(bar);
+		return;
+	}
+	wclear(bar);
+	mvwprintw(bar, 0, 0, "File successfully saved");
+	wrefresh(bar);
 }
 
 int main(int argc, char *argv[]) {
