@@ -1,47 +1,14 @@
 #include <stdlib.h>
 #include <curses.h>
 #include <string.h>
+#include "line.h"
 
 #define ctrl(x) ((x) & 0x1f)
 #define ASCII_BACKSPACE 127
 #define ASCII_ENTER 10
 
-typedef struct Line {
-	char *data;
-	struct Line *next;
-	struct Line *prev;
-} Line;
-
-void insertLineAfter(Line *currentLine);
-void insertLineBefore(Line *currentLine);
 char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar);
 void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar);
-
-void insertLineAfter(Line *currentLine) {
-	Line *newLine = malloc(sizeof(Line));
-	newLine->data = malloc(100);
-	if (currentLine->next != NULL) {
-		newLine->next = currentLine->next;
-	}
-	else {
-		newLine->next = NULL;
-	}
-	newLine->prev = currentLine;
-	currentLine->next = newLine;
-}
-
-void insertLineBefore(Line *currentLine) {
-	Line *newLine = malloc(sizeof(Line));
-	newLine->data = malloc(100);
-	if (currentLine->prev != NULL) {
-		newLine->prev = currentLine->prev;
-	}
-	else {
-		newLine->prev = NULL;
-	}
-	newLine->next = currentLine;
-	currentLine->prev = newLine;
-}
 
 char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 	wclear(bar);
@@ -149,28 +116,27 @@ int main(int argc, char *argv[]) {
 	noecho();
 	raw();
 	if (!has_colors || !can_change_color()) {
-		printw("Fuck off lad. No one even wants you here");
+		printw("Terminal can't support enough colors to run this program");
 		endwin();
 		return -1;
 	}
 	start_color();
-	// Create window
+	// Startup variables
+	char *currentFile = NULL;
 	int y, x;
+	int ch; 
+	Line *fileHead = malloc(sizeof(Line));
+	fileHead->next = NULL;
+	fileHead->prev = NULL;
+	fileHead->data = malloc(100);
+	Line *currentLine = fileHead;
+	// Create main window
 	getmaxyx(stdscr, y, x);
 	WINDOW *win = newwin(y-1, x, 0, 0); // Y, X, Y, X
 	box(win, 0, 0);	
 	init_pair(1, COLOR_CYAN, COLOR_BLACK);
 	wattron(win, COLOR_PAIR(1));
 	wrefresh(win);
-	// Startup variables
-	char *currentFile = NULL;
-	int ch; 
-	Line *fileHead = malloc(sizeof(Line));
-	fileHead->next = NULL;
-	fileHead->prev = NULL;
-	fileHead->data = malloc(100);
-	Line *currentLine;
-	currentLine = fileHead;	
 	// Bottom Bar setup
 	WINDOW *bar = newwin(1, x, y-1, 0);
 	init_color(17, 289, 211, 735);
@@ -194,13 +160,16 @@ int main(int argc, char *argv[]) {
 			endwin();
 			return 0;
 		}
-		// Test button
+		// Test line insertion
 		else if (ch == ctrl('t')) {
 			insertLineBefore(fileHead);
+			fileHead->prev->data = "Before\n";
+			insertLineAfter(fileHead);
+			fileHead->next->data = "After\n";
 			fileHead = fileHead->prev;
 		}
+		// Print out full file
 		else if (ch == ctrl('p')) {
-			// Print out full file
 			Line *dog = fileHead;
 			while (dog->next != NULL) {
 				wprintw(win, "\n%s", dog->data);
