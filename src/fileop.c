@@ -1,14 +1,10 @@
-#include <stdlib.h>
 #include <curses.h>
+#include <stdlib.h>
 #include <string.h>
-#include "line.h"
+#include "../include/line.h"
 
-#define ctrl(x) ((x) & 0x1f)
 #define ASCII_BACKSPACE 127
 #define ASCII_ENTER 10
-
-char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar);
-void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar);
 
 char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 	wclear(bar);
@@ -73,7 +69,7 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 	}
 }
 
-void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar) {
+void saveFile(char *currentFile, Line *bufferHead, WINDOW *win, WINDOW *bar) {
 	if (currentFile == NULL) {
 		wclear(bar);
 		mvwprintw(bar, 0, 0, "No file is currently open");
@@ -87,7 +83,7 @@ void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar) {
 		wrefresh(bar);
 		return;
 	}
-	Line *linePointer = fileHead;
+	Line *linePointer = bufferHead;
 	while (linePointer->next != NULL) {
 		if (fprintf(fptr, "%s", linePointer->data) < 0) {
 			wclear(bar);
@@ -109,81 +105,3 @@ void saveFile(char *currentFile, Line *fileHead, WINDOW *win, WINDOW *bar) {
 	wrefresh(bar);
 }
 
-int main(int argc, char *argv[]) {
-	// Start ncurses
-	initscr();
-	cbreak();
-	noecho();
-	raw();
-	if (!has_colors || !can_change_color()) {
-		printw("Terminal can't support enough colors to run this program");
-		endwin();
-		return -1;
-	}
-	start_color();
-	// Startup variables
-	char *currentFile = NULL;
-	int y, x;
-	int ch; 
-	Line *fileHead = malloc(sizeof(Line));
-	fileHead->next = NULL;
-	fileHead->prev = NULL;
-	fileHead->data = malloc(100);
-	Line *currentLine = fileHead;
-	// Create main window
-	getmaxyx(stdscr, y, x);
-	WINDOW *win = newwin(y-1, x, 0, 0); // Y, X, Y, X
-	box(win, 0, 0);	
-	init_pair(1, COLOR_CYAN, COLOR_BLACK);
-	wattron(win, COLOR_PAIR(1));
-	wrefresh(win);
-	// Bottom Bar setup
-	WINDOW *bar = newwin(1, x, y-1, 0);
-	init_color(17, 289, 211, 735);
-	init_pair(2, 17, 17);
-	init_pair(3, COLOR_CYAN, 17);
-	wbkgd(bar, COLOR_PAIR(2));
-	wrefresh(bar);
-	wbkgd(bar, COLOR_PAIR(3));
-
-	// Main loop
-	while (1) {
-		ch = wgetch(win);
-		getyx(win, y, x);
-		if (ch == ctrl('o')) {
-			currentFile = openFile(fileHead, win, bar);
-		} 
-		else if (ch == ctrl('s')) {
-			saveFile(currentFile, fileHead, win, bar);
-		}
-		else if (ch == ctrl('c')) {
-			endwin();
-			return 0;
-		}
-		// Test line insertion
-		else if (ch == ctrl('t')) {
-			insertLineBefore(fileHead);
-			fileHead->prev->data = "Before\n";
-			insertLineAfter(fileHead);
-			fileHead->next->data = "After\n";
-			fileHead = fileHead->prev;
-		}
-		// Print out full file
-		else if (ch == ctrl('p')) {
-			Line *dog = fileHead;
-			while (dog->next != NULL) {
-				wprintw(win, "\n%s", dog->data);
-				dog = dog->next;
-			}
-		}
-		else {
-			mvwprintw(win, y, x, "%c", ch);
-		}
-		wrefresh(win);
-	}
-	
-	// Important end stuff
-	getch();
-	endwin();
-	return 0;
-}

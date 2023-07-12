@@ -1,5 +1,5 @@
-#include "line.h"
 #include <stdlib.h>
+#include "../include/line.h"
 
 struct Line;
 
