@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
 				dog = dog->next;
 			}
 		}
-		else {
-			mvwprintw(win, y, x, "%c", ch);
+		else if (ch >= 32 && ch <= 256) {
+			mvwprintw(win, y, x, "%c\n", ch);
 		}
 		wrefresh(win);
 	}

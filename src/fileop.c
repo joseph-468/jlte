@@ -9,15 +9,15 @@
 char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 	wclear(bar);
 	mvwprintw(bar, 0, 0, "Open file: ");
-	short y, x;
-	short startX, startY;
+	int y, x;
+	int startX, startY;
 	int i = 0;
 	char fileName[100] = {'\0'};
-	char ch;
+	int ch;
 	getyx(bar, startY, startX);
 	wrefresh(bar);
 	while (1) {
-		ch = wgetch(win);
+		ch = wgetch(bar);
 		getyx(bar, y, x);
 		if (ch == ASCII_ENTER) {
 			mvwprintw(win, 0, 8, "%s", fileName);
@@ -60,7 +60,7 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 				mvwdelch(bar, y, x-1);
 			}
 		}
-		else {
+		else if (ch >= 32 && ch <= 256) {
 			fileName[i] = ch;
 			i += 1;
 			mvwprintw(bar, y, x, "%c", ch);
