@@ -1,5 +1,6 @@
 #include <curses.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../include/line.h"
 
 int startNcurses() {
@@ -43,6 +44,7 @@ Line *createBufferHead() {
 	Line *bufferHead = malloc(sizeof(Line));
 	bufferHead->length = 2;
 	bufferHead->data = malloc(bufferHead->length);
+	memset(bufferHead->data, '\0', bufferHead->length);
 	bufferHead->next = NULL;
 	bufferHead->prev = NULL;
 	return bufferHead;

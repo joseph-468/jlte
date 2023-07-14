@@ -29,17 +29,18 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 					wrefresh(bar);
 					return NULL;
 				}
-				char *fileNamePointer = malloc(strlen(fileName));
-				strcpy(fileNamePointer, fileName);
-				wclear(bar);
-				mvwprintw(bar, 0, 0, "File created");
-				wrefresh(bar);	
-				return fileNamePointer; // Success
+				else {
+					char *fileNamePointer = malloc(strlen(fileName));
+					strcpy(fileNamePointer, fileName);
+					wclear(bar);
+					mvwprintw(bar, 0, 0, "File created");
+					wrefresh(bar);	
+					return fileNamePointer; // Success
+				}
 			}
 			else {
 				char *fileNamePointer = malloc(strlen(fileName));
 				strcpy(fileNamePointer, fileName);
-				char lineTest[100];
 				wclear(bar);
 				mvwprintw(bar, 0, 0, "File opened");
 				// Append to list

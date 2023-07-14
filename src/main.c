@@ -43,11 +43,8 @@ int main(int argc, char *argv[]) {
 		}
 		// Test line insertion
 		else if (ch == ctrl('t')) {
-			insertLineBefore(bufferHead);
-			bufferHead->prev->data = "Before\n";
-			insertLineAfter(bufferHead);
-			bufferHead->next->data = "After\n";
-			bufferHead = bufferHead->prev;
+			insertLineAfter(currentLine);
+			currentLine = currentLine->next;
 		}
 		// Print out full file
 		else if (ch == ctrl('p')) {
