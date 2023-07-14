@@ -20,14 +20,21 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 		ch = wgetch(bar);
 		getyx(bar, y, x);
 		if (ch == ASCII_ENTER) {
-			mvwprintw(win, 0, 8, "%s", fileName);
-			wrefresh(win);
 			FILE *fptr = fopen(fileName, "r");
 			if (fptr == NULL) {
+				fptr = fopen(fileName, "w");
+				if (fptr == NULL) {
+					wclear(bar);
+					mvwprintw(bar, 0, 0, "Error opening file");
+					wrefresh(bar);
+					return NULL;
+				}
+				char *fileNamePointer = malloc(strlen(fileName));
+				strcpy(fileNamePointer, fileName);
 				wclear(bar);
-				mvwprintw(bar, 0, 0, "Error opening file");
-				wrefresh(bar);
-				return NULL;
+				mvwprintw(bar, 0, 0, "File created");
+				wrefresh(bar);	
+				return fileNamePointer; // Success
 			}
 			else {
 				char *fileNamePointer = malloc(strlen(fileName));
@@ -84,7 +91,7 @@ void saveFile(char *currentFile, Line *bufferHead, WINDOW *win, WINDOW *bar) {
 		return;
 	}
 	Line *linePointer = bufferHead;
-	while (linePointer->next != NULL) {
+	while (linePointer != NULL) {
 		if (fprintf(fptr, "%s", linePointer->data) < 0) {
 			wclear(bar);
 			mvwprintw(bar, 0, 0, "Error writing to file");

@@ -28,7 +28,11 @@ int main(int argc, char *argv[]) {
 		ch = wgetch(win);
 		getyx(win, y, x);
 		if (ch == ctrl('o')) {
+			char *tempCurrentFile = currentFile;
 			currentFile = openFile(bufferHead, win, bar);
+			if (currentFile != NULL) {
+				free(tempCurrentFile);
+			}
 		} 
 		else if (ch == ctrl('s')) {
 			saveFile(currentFile, bufferHead, win, bar);
@@ -53,9 +57,13 @@ int main(int argc, char *argv[]) {
 				dog = dog->next;
 			}
 		}
+		else if (ch == KEY_BACKSPACE) {
+			currentLine->data[x] = '\0';
+			mvwdelch(win, y, x-1);
+		}
 		// Regular characters
 		else if (ch >= 32 && ch <= 256) {
-			resizeLine(currentLine);
+			resizeLine(currentLine); // Can't realloc less data yet :(
 			currentLine->data[x] = ch;
 			mvwprintw(win, y, x, "%c", ch);
 		}
