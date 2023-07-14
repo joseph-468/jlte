@@ -48,13 +48,16 @@ int main(int argc, char *argv[]) {
 		// Print out full file
 		else if (ch == ctrl('p')) {
 			Line *dog = bufferHead;
-			while (dog->next != NULL) {
-				wprintw(win, "\n%s", dog->data);
+			while (dog != NULL) {
+				wprintw(win, "%s", dog->data);
 				dog = dog->next;
 			}
 		}
+		// Regular characters
 		else if (ch >= 32 && ch <= 256) {
-			mvwprintw(win, y, x, "%c\n", ch);
+			resizeLine(currentLine);
+			currentLine->data[x] = ch;
+			mvwprintw(win, y, x, "%c", ch);
 		}
 		wrefresh(win);
 	}

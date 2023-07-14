@@ -1,11 +1,20 @@
 #include <stdlib.h>
+#include <string.h>
 #include "../include/line.h"
 
 struct Line;
 
+void resizeLine(Line *currentLine) {
+	if (currentLine->length <= strlen(currentLine->data)) {
+		currentLine->length = currentLine->length * 2;
+		currentLine->data = realloc(currentLine->data, currentLine->length);
+	}
+}
+
 void insertLineAfter(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
-	newLine->data = malloc(100);
+	newLine->length = 2;
+	newLine->data = malloc(newLine->length);
 	if (currentLine->next != NULL) {
 		newLine->next = currentLine->next;
 	}
@@ -18,7 +27,8 @@ void insertLineAfter(Line *currentLine) {
 
 void insertLineBefore(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
-	newLine->data = malloc(100);
+	newLine->length = 2;
+	newLine->data = malloc(newLine->length);
 	if (currentLine->prev != NULL) {
 		newLine->prev = currentLine->prev;
 	}
@@ -28,4 +38,5 @@ void insertLineBefore(Line *currentLine) {
 	newLine->next = currentLine;
 	currentLine->prev = newLine;
 }
+
 
