@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		getyx(win, y, x);
 		if (ch == ctrl('o')) {
 			char *tempCurrentFile = currentFile;
-			currentFile = openFile(bufferHead, win, bar);
+			currentFile = openFile(&currentLine, bufferHead, win, bar);
 			if (currentFile != NULL) {
 				free(tempCurrentFile);
 			}
@@ -53,7 +53,6 @@ int main(int argc, char *argv[]) {
 				wprintw(win, "%s", dog->data);
 				dog = dog->next;
 			}
-			freeAllLines(bufferHead);
 		}
 		else if (ch == KEY_BACKSPACE) {
 			currentLine->data[x] = '\0';

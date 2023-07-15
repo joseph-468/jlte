@@ -9,7 +9,6 @@ void freeAllLines(Line *bufferHead) {
 	free(bufferHead->data);
 	bufferHead->data = malloc(bufferHead->length);
 	memset(bufferHead->data, '\0', bufferHead->length);
-	bufferHead->data[0] = '\n';
 	Line *currentLine = bufferHead->next;
 	Line *nextLine;	
 	while (currentLine != NULL) {

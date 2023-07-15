@@ -6,7 +6,7 @@
 #define ASCII_BACKSPACE 127
 #define ASCII_ENTER 10
 
-char * openFile(Line *bufferHead, WINDOW *win, WINDOW *bar) {
+char * openFile(Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) {
 	wclear(bar);
 	mvwprintw(bar, 0, 0, "Open file: ");
 	int y, x;
@@ -29,27 +29,37 @@ char * openFile(Line *bufferHead, WINDOW *win, WINDOW *bar) {
 					wrefresh(bar);
 					return NULL;
 				}
-				else {
-					char *fileNamePointer = malloc(strlen(fileName));
-					strcpy(fileNamePointer, fileName);
-					wclear(bar);
-					mvwprintw(bar, 0, 0, "File created");
-					wrefresh(bar);	
-					return fileNamePointer; // Success
-				}
-			}
-			else {
+				freeAllLines(bufferHead);
 				char *fileNamePointer = malloc(strlen(fileName));
-				Line *currentLine = bufferHead;
 				strcpy(fileNamePointer, fileName);
 				wclear(bar);
+				wclear(win);
+				mvwprintw(bar, 0, 0, "File created");
+				wrefresh(bar);	
+				return fileNamePointer; // Success
+			}
+			else {
+				freeAllLines(bufferHead);
+				char *fileNamePointer = malloc(strlen(fileName));
+				Line *currentFileLine = bufferHead;
+				short hasData = 0;
+				strcpy(fileNamePointer, fileName);
+				wclear(bar);
+				wclear(win);
 				mvwprintw(bar, 0, 0, "File opened");
-				// Append to list
-				char string[100];
-				while(fgets(string, 100, fptr)) {
-					insertLineAfter(currentLine);
-					strcpy(currentLine->data, string);
-					currentLine = currentLine->next;
+				// Open file in lines
+				char string[1000];
+				while(fgets(string, 1000, fptr)) {
+					insertLineAfter(currentFileLine);
+					strcpy(currentFileLine->data, string);
+					currentFileLine = currentFileLine->next;
+					hasData = 1;
+				}
+				if (hasData == 1) {	
+					*currentLine = currentFileLine;
+				}
+				else {
+					*currentLine = bufferHead;					
 				}
 				// Exit function
 				wrefresh(bar);
