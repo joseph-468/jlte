@@ -6,7 +6,7 @@
 #define ASCII_BACKSPACE 127
 #define ASCII_ENTER 10
 
-char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
+char * openFile(Line *bufferHead, WINDOW *win, WINDOW *bar) {
 	wclear(bar);
 	mvwprintw(bar, 0, 0, "Open file: ");
 	int y, x;
@@ -40,6 +40,7 @@ char * openFile(Line *currentLine, WINDOW *win, WINDOW *bar) {
 			}
 			else {
 				char *fileNamePointer = malloc(strlen(fileName));
+				Line *currentLine = bufferHead;
 				strcpy(fileNamePointer, fileName);
 				wclear(bar);
 				mvwprintw(bar, 0, 0, "File opened");

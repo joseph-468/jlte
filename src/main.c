@@ -53,6 +53,7 @@ int main(int argc, char *argv[]) {
 				wprintw(win, "%s", dog->data);
 				dog = dog->next;
 			}
+			freeAllLines(bufferHead);
 		}
 		else if (ch == KEY_BACKSPACE) {
 			currentLine->data[x] = '\0';
