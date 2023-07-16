@@ -22,10 +22,14 @@ void freeAllLines(Line *bufferHead) {
 }
 
 void resizeLine(Line *currentLine) {
-	if (currentLine->length <= strlen(currentLine->data)) {
+	if (strlen(currentLine->data) >= currentLine->length) {
 		currentLine->length = currentLine->length * 2;
 		currentLine->data = realloc(currentLine->data, currentLine->length);
 		currentLine->data[currentLine->length/2] = '\0';
+	}
+	else if (strlen(currentLine->data) <= currentLine->length/2 && currentLine->length/2 > 1) {
+		currentLine->length = currentLine->length/2;
+		currentLine->data = realloc(currentLine->data, currentLine->length);
 	}
 }
 

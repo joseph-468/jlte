@@ -36,6 +36,9 @@ int main(int argc, char *argv[]) {
 		} 
 		else if (ch == ctrl('s')) {
 			saveFile(currentFile, bufferHead, win, bar);
+			mvwprintw(win, y+1, x, "%s", currentLine->data);
+			mvwprintw(win, y+2, x, "%d", currentLine->length);
+			wmove(win, y, x);
 		}
 		else if (ch == ctrl('c')) {
 			endwin();
@@ -55,12 +58,15 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		else if (ch == KEY_BACKSPACE) {
-			currentLine->data[x] = '\0';
+			// Order between resizing and inserting data matters
+			currentLine->data[x-1] = '\0';
+			resizeLine(currentLine);
 			mvwdelch(win, y, x-1);
 		}
 		// Regular characters
 		else if (ch >= 32 && ch <= 256) {
-			resizeLine(currentLine); // Can't realloc less data yet :(
+			// Order between resizing and inserting data matters
+			resizeLine(currentLine);
 			currentLine->data[x] = ch;
 			mvwprintw(win, y, x, "%c", ch);
 		}
