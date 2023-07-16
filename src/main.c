@@ -36,9 +36,6 @@ int main(int argc, char *argv[]) {
 		} 
 		else if (ch == ctrl('s')) {
 			saveFile(currentFile, bufferHead, win, bar);
-			mvwprintw(win, y+1, x, "%s", currentLine->data);
-			mvwprintw(win, y+2, x, "%d", currentLine->length);
-			wmove(win, y, x);
 		}
 		else if (ch == ctrl('c')) {
 			endwin();
@@ -62,6 +59,12 @@ int main(int argc, char *argv[]) {
 			currentLine->data[x-1] = '\0';
 			resizeLine(currentLine);
 			mvwdelch(win, y, x-1);
+		}
+		// Creates new line (Enter key)
+		else if (ch == 10) {
+			insertLineAfter(currentLine);
+			currentLine = currentLine->next;
+			wprintw(win, "\n");
 		}
 		// Regular characters
 		else if (ch >= 32 && ch <= 256) {

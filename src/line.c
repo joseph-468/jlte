@@ -25,7 +25,7 @@ void resizeLine(Line *currentLine) {
 	if (strlen(currentLine->data) >= currentLine->length) {
 		currentLine->length = currentLine->length * 2;
 		currentLine->data = realloc(currentLine->data, currentLine->length);
-		currentLine->data[currentLine->length/2] = '\0';
+		memset(currentLine->data+currentLine->length/2, '\0', currentLine->length/2);
 	}
 	else if (strlen(currentLine->data) <= currentLine->length/2 && currentLine->length/2 > 1) {
 		currentLine->length = currentLine->length/2;
@@ -38,7 +38,6 @@ void insertLineAfter(Line *currentLine) {
 	newLine->length = 2;
 	newLine->data = malloc(newLine->length);
 	memset(newLine->data, '\0', newLine->length);
-	newLine->data[0] = '\n';
 	if (currentLine->next != NULL) {
 		newLine->next = currentLine->next;
 	}
@@ -54,7 +53,6 @@ void insertLineBefore(Line *currentLine) {
 	newLine->length = 2;
 	newLine->data = malloc(newLine->length);
 	memset(newLine->data, '\0', newLine->length);
-	newLine->data[0] = '\n';
 	if (currentLine->prev != NULL) {
 		newLine->prev = currentLine->prev;
 	}

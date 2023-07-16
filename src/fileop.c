@@ -104,12 +104,24 @@ void saveFile(char *currentFile, Line *bufferHead, WINDOW *win, WINDOW *bar) {
 	}
 	Line *linePointer = bufferHead;
 	while (linePointer != NULL) {
-		if (fprintf(fptr, "%s", linePointer->data) < 0) {
-			wclear(bar);
-			mvwprintw(bar, 0, 0, "Error writing to file");
-			wrefresh(bar);
-			fclose(fptr);
-			return;	
+		// Add linebreak unless it's last line
+		if (linePointer->next != NULL) {
+			if (fprintf(fptr, "%s\n", linePointer->data) < 0) {
+				wclear(bar);
+				mvwprintw(bar, 0, 0, "Error writing to file");
+				wrefresh(bar);
+				fclose(fptr);
+				return;	
+			}
+		}
+		else {
+			if (fprintf(fptr, "%s", linePointer->data) < 0) {
+				wclear(bar);
+				mvwprintw(bar, 0, 0, "Error writing to file");
+				wrefresh(bar);
+				fclose(fptr);
+				return;	
+			}
 		}
 		linePointer = linePointer->next;
 	}
