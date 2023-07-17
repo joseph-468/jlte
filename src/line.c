@@ -25,7 +25,7 @@ void resizeLine(Line *currentLine) {
 	if (strlen(currentLine->data) >= currentLine->length) {
 		currentLine->length = currentLine->length * 2;
 		currentLine->data = realloc(currentLine->data, currentLine->length);
-		memset(currentLine->data+currentLine->length/2, '\0', currentLine->length/2);
+		memset(currentLine->data+currentLine->length/2+1, '\0', currentLine->length/2);
 	}
 	else if (strlen(currentLine->data) <= currentLine->length/2 && currentLine->length/2 > 1) {
 		currentLine->length = currentLine->length/2;

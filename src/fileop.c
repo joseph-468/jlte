@@ -50,8 +50,9 @@ char * openFile(Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) 
 				// Open file in lines
 				char string[1000];
 				while(fgets(string, 1000, fptr)) {
-					insertLineAfter(currentFileLine);
+					string[strlen(string)-1] = '\0'; // Get rid of linebreak
 					strcpy(currentFileLine->data, string);
+					insertLineAfter(currentFileLine);
 					currentFileLine = currentFileLine->next;
 					hasData = 1;
 				}
@@ -103,8 +104,8 @@ void saveFile(char *currentFile, Line *bufferHead, WINDOW *win, WINDOW *bar) {
 		return;
 	}
 	Line *linePointer = bufferHead;
-	if (strlen(bufferHead->data) > 0) {
-		while (linePointer != NULL) {
+	while (linePointer != NULL) {
+		if (strlen(linePointer->data) > 0) {
 			if (fprintf(fptr, "%s\n", linePointer->data) < 0) {
 				wclear(bar);
 				mvwprintw(bar, 0, 0, "Error writing to file");
@@ -112,8 +113,8 @@ void saveFile(char *currentFile, Line *bufferHead, WINDOW *win, WINDOW *bar) {
 				fclose(fptr);
 				return;	
 			}
-			linePointer = linePointer->next;
 		}
+		linePointer = linePointer->next;
 	}
 	if (fclose(fptr) != 0) {
 		wclear(bar);
