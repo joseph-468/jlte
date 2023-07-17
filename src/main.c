@@ -50,10 +50,34 @@ int main(int argc, char *argv[]) {
 		else if (ch == ctrl('p')) {
 			Line *dog = bufferHead;
 			while (dog != NULL) {
-				wprintw(win, "%s", dog->data);
+				wprintw(win, "%s\n", dog->data);
 				dog = dog->next;
 			}
 		}
+		// Arrow keys
+		else if (ch == KEY_UP) {
+			if (y > 0) {
+				currentLine = currentLine->prev;
+				wmove(win, y-1, x);
+			}
+		}
+		else if (ch == KEY_DOWN) {
+			if (currentLine->next != NULL) {
+				currentLine = currentLine->next;
+				wmove(win, y+1, x);
+			}
+		}
+		else if (ch == KEY_LEFT) {
+			if (x > 0) {
+				wmove(win, y, x-1);
+			}
+		}
+		else if (ch == KEY_RIGHT) {
+			if (currentLine->data[x] != '\0') {
+				wmove(win, y, x+1);
+			}
+		}
+		// Backspace
 		else if (ch == KEY_BACKSPACE) {
 			// Order between resizing and inserting data matters
 			currentLine->data[x-1] = '\0';
