@@ -6,6 +6,62 @@
 #define ASCII_BACKSPACE 127
 #define ASCII_ENTER 10
 
+char * openFileFromName(char fileName[], Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) {
+	FILE *fptr = fopen(fileName, "r");
+	if (fptr == NULL) {
+		fptr = fopen(fileName, "w");
+		if (fptr == NULL) {
+			wclear(bar);
+			mvwprintw(bar, 0, 0, "Error opening file");
+			wrefresh(bar);
+			return NULL;
+		}
+		freeAllLines(bufferHead);
+		char *fileNamePointer = malloc(strlen(fileName));
+		strcpy(fileNamePointer, fileName);
+		wclear(bar);
+		wclear(win);
+		mvwprintw(bar, 0, 0, "File created");
+		wrefresh(bar);	
+		return fileNamePointer; // Success
+	}
+	else {
+		freeAllLines(bufferHead);
+		char *fileNamePointer = malloc(strlen(fileName));
+		Line *currentFileLine = bufferHead;
+		short hasData = 0;
+		strcpy(fileNamePointer, fileName);
+		wclear(bar);
+		wclear(win);
+		mvwprintw(bar, 0, 0, "File opened");
+		// Open file in lines
+		char string[1000];
+		while(fgets(string, 1000, fptr)) {
+			string[strlen(string)-1] = '\0'; // Get rid of linebreak
+			setSize(currentFileLine, strlen(string));
+			strcpy(currentFileLine->data, string);
+			insertLineAfter(currentFileLine);
+			currentFileLine = currentFileLine->next;
+			hasData = 1;
+		}
+		if (hasData == 1) {	
+			*currentLine = currentFileLine;
+		}
+		else {
+			*currentLine = bufferHead;					
+		}
+		// Exit function
+		wrefresh(bar);
+		if (fclose(fptr) != 0) {
+			wclear(bar);
+			mvwprintw(bar, 0, 0, "Error closing file");
+			wrefresh(bar);
+			return NULL;
+		}
+		return fileNamePointer; // Sucess
+	}
+}
+
 char * openFile(Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) {
 	wclear(bar);
 	mvwprintw(bar, 0, 0, "Open file: ");
@@ -20,59 +76,7 @@ char * openFile(Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) 
 		ch = wgetch(bar);
 		getyx(bar, y, x);
 		if (ch == ASCII_ENTER) {
-			FILE *fptr = fopen(fileName, "r");
-			if (fptr == NULL) {
-				fptr = fopen(fileName, "w");
-				if (fptr == NULL) {
-					wclear(bar);
-					mvwprintw(bar, 0, 0, "Error opening file");
-					wrefresh(bar);
-					return NULL;
-				}
-				freeAllLines(bufferHead);
-				char *fileNamePointer = malloc(strlen(fileName));
-				strcpy(fileNamePointer, fileName);
-				wclear(bar);
-				wclear(win);
-				mvwprintw(bar, 0, 0, "File created");
-				wrefresh(bar);	
-				return fileNamePointer; // Success
-			}
-			else {
-				freeAllLines(bufferHead);
-				char *fileNamePointer = malloc(strlen(fileName));
-				Line *currentFileLine = bufferHead;
-				short hasData = 0;
-				strcpy(fileNamePointer, fileName);
-				wclear(bar);
-				wclear(win);
-				mvwprintw(bar, 0, 0, "File opened");
-				// Open file in lines
-				char string[1000];
-				while(fgets(string, 1000, fptr)) {
-					string[strlen(string)-1] = '\0'; // Get rid of linebreak
-					setSize(currentFileLine, strlen(string));
-					strcpy(currentFileLine->data, string);
-					insertLineAfter(currentFileLine);
-					currentFileLine = currentFileLine->next;
-					hasData = 1;
-				}
-				if (hasData == 1) {	
-					*currentLine = currentFileLine;
-				}
-				else {
-					*currentLine = bufferHead;					
-				}
-				// Exit function
-				wrefresh(bar);
-				if (fclose(fptr) != 0) {
-					wclear(bar);
-					mvwprintw(bar, 0, 0, "Error closing file");
-					wrefresh(bar);
-					return NULL;
-				}
-				return fileNamePointer; // Sucess
-			}
+			return openFileFromName(fileName, currentLine, bufferHead, win, bar);
 		}
 		else if (ch == ASCII_BACKSPACE) {
 			if (startX < x) { 

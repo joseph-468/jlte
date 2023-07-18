@@ -22,11 +22,17 @@ int main(int argc, char *argv[]) {
 	WINDOW *win = setupMainWindow(y, x);
 	Line *bufferHead = createBufferHead();
 	Line *currentLine = bufferHead;
-
+	
+	// Open file from command line args	
+	if (argc == 2) {
+		currentFile = openFileFromName(argv[1], &currentLine, bufferHead, win, bar);
+	}
+	
 	// Main loop
 	while (1) {
 		ch = wgetch(win);
 		getyx(win, y, x);
+		// Open file and free old filename
 		if (ch == ctrl('o')) {
 			char *tempCurrentFile = currentFile;
 			currentFile = openFile(&currentLine, bufferHead, win, bar);
