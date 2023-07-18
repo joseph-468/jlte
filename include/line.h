@@ -9,6 +9,7 @@ typedef struct Line {
 } Line;
 
 void freeAllLines(Line *bufferHead);
+void setSize(Line *currentLine, long size);
 void resizeLine(Line *currentLine); 
 void insertLineAfter(Line *currentLine);
 void insertLineBefore(Line *currentLine);

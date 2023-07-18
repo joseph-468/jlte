@@ -5,7 +5,7 @@
 struct Line;
 
 void freeAllLines(Line *bufferHead) {
-	bufferHead->length = 2;
+	bufferHead->length = 1;
 	free(bufferHead->data);
 	bufferHead->data = malloc(bufferHead->length);
 	memset(bufferHead->data, '\0', bufferHead->length);
@@ -19,6 +19,18 @@ void freeAllLines(Line *bufferHead) {
 	}
 	bufferHead->next = NULL;
 	bufferHead->prev = NULL;
+}
+
+void setSize(Line *currentLine, long size) {
+	// Find nearest power of 2
+	long i = 1;
+	while (i < size) {
+		i = i * 2;
+	}
+	currentLine->length = i;
+	free(currentLine->data);
+	currentLine->data = malloc(currentLine->length);
+	memset(currentLine->data, '\0', currentLine->length);
 }
 
 void resizeLine(Line *currentLine) {
@@ -35,7 +47,7 @@ void resizeLine(Line *currentLine) {
 
 void insertLineAfter(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
-	newLine->length = 2;
+	newLine->length = 1;
 	newLine->data = malloc(newLine->length);
 	memset(newLine->data, '\0', newLine->length);
 	if (currentLine->next != NULL) {
@@ -50,7 +62,7 @@ void insertLineAfter(Line *currentLine) {
 
 void insertLineBefore(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
-	newLine->length = 2;
+	newLine->length = 1;
 	newLine->data = malloc(newLine->length);
 	memset(newLine->data, '\0', newLine->length);
 	if (currentLine->prev != NULL) {

@@ -51,6 +51,7 @@ char * openFile(Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) 
 				char string[1000];
 				while(fgets(string, 1000, fptr)) {
 					string[strlen(string)-1] = '\0'; // Get rid of linebreak
+					setSize(currentFileLine, strlen(string));
 					strcpy(currentFileLine->data, string);
 					insertLineAfter(currentFileLine);
 					currentFileLine = currentFileLine->next;
