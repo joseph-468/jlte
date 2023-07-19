@@ -41,7 +41,7 @@ WINDOW * setupBar(int y, int x) {
 
 Line *createBufferHead() {
 	Line *bufferHead = malloc(sizeof(Line));
-	bufferHead->length = 1;
+	bufferHead->length = 2;
 	bufferHead->data = malloc(bufferHead->length);
 	memset(bufferHead->data, '\0', bufferHead->length);
 	bufferHead->next = NULL;
