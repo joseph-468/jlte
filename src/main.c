@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 	}
 	char *currentFile = NULL;
 	int y, x;
+	int lastXPos;
 	int ch; 
 	getmaxyx(stdscr, y, x);
 	setupColors();
@@ -65,23 +66,35 @@ int main(int argc, char *argv[]) {
 			if (y > 0) {
 				currentLine = currentLine->prev;
 				wmove(win, y-1, x);
+				getyx(win, y, x);
+				while (currentLine->data[x-1] == '\0') {
+					wmove(win, y, x-1);
+					getyx(win, y, x);
+				}
 			}
 		}
 		else if (ch == KEY_DOWN) {
 			if (currentLine->next != NULL) {
 				currentLine = currentLine->next;
 				wmove(win, y+1, x);
+				getyx(win, y, x);
+				while (currentLine->data[x-1] == '\0') {
+					wmove(win, y, x-1);
+					getyx(win, y, x);
+				}
 			}
 		}
 		else if (ch == KEY_LEFT) {
 			if (x > 0) {
 				wmove(win, y, x-1);
 			}
+			lastXPos = x;
 		}
 		else if (ch == KEY_RIGHT) {
 			if (currentLine->data[x] != '\0') {
 				wmove(win, y, x+1);
 			}
+			lastXPos = x;
 		}
 		// Backspace
 		else if (ch == KEY_BACKSPACE) {
