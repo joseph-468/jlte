@@ -65,10 +65,10 @@ int main(int argc, char *argv[]) {
 		else if (ch == KEY_UP) {
 			if (y > 0) {
 				currentLine = currentLine->prev;
-				wmove(win, y-1, x);
+				wmove(win, y-1, 0);
 				getyx(win, y, x);
-				while (currentLine->data[x-1] == '\0') {
-					wmove(win, y, x-1);
+				while (currentLine->data[x] != '\0' && x != lastXPos) {
+					wmove(win, y, x+1);
 					getyx(win, y, x);
 				}
 			}
@@ -76,10 +76,10 @@ int main(int argc, char *argv[]) {
 		else if (ch == KEY_DOWN) {
 			if (currentLine->next != NULL) {
 				currentLine = currentLine->next;
-				wmove(win, y+1, x);
+				wmove(win, y+1, 0);
 				getyx(win, y, x);
-				while (currentLine->data[x-1] == '\0') {
-					wmove(win, y, x-1);
+				while (currentLine->data[x] != '\0' && x != lastXPos) {
+					wmove(win, y, x+1);
 					getyx(win, y, x);
 				}
 			}
@@ -111,6 +111,7 @@ int main(int argc, char *argv[]) {
 		}
 		// Regular characters
 		else if (ch >= 32 && ch <= 256) {
+			lastXPos = x+1;
 			// Order between resizing and inserting data matters
 			resizeLine(currentLine);
 			if (currentLine->data[x] != '\0') {
