@@ -100,8 +100,19 @@ int main(int argc, char *argv[]) {
 		else if (ch >= 32 && ch <= 256) {
 			// Order between resizing and inserting data matters
 			resizeLine(currentLine);
-			currentLine->data[x] = ch;
-			mvwprintw(win, y, x, "%c", ch);
+			if (currentLine->data[x] != '\0') {
+				int arrayEnd = strlen(currentLine->data)-1;
+				for (int i = arrayEnd; i >= x; i--) {
+					currentLine->data[i+1] = currentLine->data[i];
+				}
+				currentLine->data[x] = ch;
+				mvwprintw(win, y, 0, "%s", currentLine->data);
+				wmove(win, y, x+1);
+			}
+			else {
+				currentLine->data[x] = ch;
+				mvwprintw(win, y, x, "%c", ch);
+			}
 		}
 		wrefresh(win);
 	}

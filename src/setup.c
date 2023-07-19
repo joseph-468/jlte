@@ -26,7 +26,6 @@ void setupColors() {
 WINDOW * setupMainWindow(int y, int x) {
 	WINDOW *win = newwin(y-1, x, 0, 0);
 	keypad(win, TRUE);
-	box(win, 0, 0);	
 	wattron(win, COLOR_PAIR(1));
 	wrefresh(win);
 	return win;
