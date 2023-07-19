@@ -17,16 +17,18 @@ int startNcurses() {
 }
 
 void setupColors() {
-	init_color(17, 289, 211, 735);
-	init_pair(2, 17, 17);
-	init_pair(3, COLOR_CYAN, 17);
-	init_pair(1, COLOR_CYAN, COLOR_BLACK);
+	init_color(17, 888, 407, 915);
+	init_color(18, 919, 903, 641);
+	init_color(19, 641, 653, 915);
+	init_color(20, 457, 145, 536);
+	init_pair(1, 17, 18);
+	init_pair(2, 20, 19);
 }
 
 WINDOW * setupMainWindow(int y, int x) {
 	WINDOW *win = newwin(y-1, x, 0, 0);
 	keypad(win, TRUE);
-	wattron(win, COLOR_PAIR(1));
+	wbkgd(win, COLOR_PAIR(1));
 	wrefresh(win);
 	return win;
 }
@@ -34,7 +36,7 @@ WINDOW * setupMainWindow(int y, int x) {
 WINDOW * setupBar(int y, int x) {
 	WINDOW *bar = newwin(1, x, y-1, 0);
 	keypad(bar, TRUE);
-	wbkgd(bar, COLOR_PAIR(3));
+	wbkgd(bar, COLOR_PAIR(2));
 	wrefresh(bar);
 	return bar;
 }

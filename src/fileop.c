@@ -3,7 +3,6 @@
 #include <string.h>
 #include "../include/line.h"
 
-#define ASCII_BACKSPACE 127
 #define ASCII_ENTER 10
 
 char * openFileFromName(char fileName[], Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) {
@@ -78,7 +77,7 @@ char * openFile(Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) 
 		if (ch == ASCII_ENTER) {
 			return openFileFromName(fileName, currentLine, bufferHead, win, bar);
 		}
-		else if (ch == ASCII_BACKSPACE) {
+		else if (ch == KEY_BACKSPACE) {
 			if (startX < x) { 
 				i -= 1;
 				fileName[i] = '\0';
