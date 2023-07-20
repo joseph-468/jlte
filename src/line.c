@@ -27,9 +27,14 @@ void setSize(Line *currentLine, long size) {
 	while (i < size+1) {
 		i = i * 2;
 	}
+	// Allocate new memory
+	char *tempData = malloc(strlen(currentLine->data));
+	strcpy(tempData, currentLine->data);
 	currentLine->length = i;
-	currentLine->data = realloc(currentLine->data, currentLine->length);
-	memset(currentLine->data+strlen(currentLine->data), '\0', currentLine->length);
+	currentLine->data = malloc(currentLine->length);
+	strcpy(currentLine->data, tempData);
+	free(tempData);
+	memset(currentLine->data+strlen(currentLine->data), '\0', currentLine->length-strlen(currentLine->data));
 }
 
 void resizeLine(Line *currentLine) {

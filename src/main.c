@@ -107,17 +107,29 @@ int main(int argc, char *argv[]) {
 		else if (ch == 10) {
 			// Copy text that will go on new line and remove from current line
 			int newLineSize = strlen(currentLine->data+x);
-			char *newLineText = malloc(newLineSize);
-			strcpy(newLineText, currentLine->data+x);
-			memset(currentLine->data+x, '\0', newLineSize);
-			setSize(currentLine, strlen(currentLine->data));
-			wprintw(win, "\n");
-			// Put new line text in new line
-			insertLineAfter(currentLine);
-			currentLine = currentLine->next;
-			strcpy(currentLine->data, newLineText);
-			setSize(currentLine, newLineSize);
-			free(newLineText);
+			char *newLineText = malloc(newLineSize+1);
+			if (newLineText != NULL) {
+				if (newLineSize > 0) {
+					strcpy(newLineText, currentLine->data+x);
+					memset(currentLine->data+x, '\0', newLineSize);
+					setSize(currentLine, strlen(currentLine->data));
+				}
+				// Put new line text in new line
+				insertLineAfter(currentLine);
+				currentLine = currentLine->next;
+				if (newLineSize > 0) {
+					setSize(currentLine, newLineSize);
+					strcpy(currentLine->data, newLineText);
+				}
+				free(newLineText);
+				// Print new buffer
+				Line *tempCurrentLine = currentLine;
+				while (tempCurrentLine != NULL) {
+					wprintw(win, "\n%s", tempCurrentLine->data);
+					tempCurrentLine = tempCurrentLine->next;
+				}
+				wmove(win, y+1, 0);
+			}
 		}
 		// Regular characters
 		else if (ch >= 32 && ch <= 256) {
