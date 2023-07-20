@@ -23,14 +23,13 @@ void freeAllLines(Line *bufferHead) {
 
 void setSize(Line *currentLine, long size) {
 	// Find nearest power of 2
-	long i = 1;
+	long i = 2;
 	while (i < size+1) {
 		i = i * 2;
 	}
 	currentLine->length = i;
-	free(currentLine->data);
-	currentLine->data = malloc(currentLine->length);
-	memset(currentLine->data, '\0', currentLine->length);
+	currentLine->data = realloc(currentLine->data, currentLine->length);
+	memset(currentLine->data+strlen(currentLine->data), '\0', currentLine->length);
 }
 
 void resizeLine(Line *currentLine) {
