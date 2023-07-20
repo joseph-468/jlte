@@ -15,12 +15,13 @@ int main(int argc, char *argv[]) {
 	}
 	char *currentFile = NULL;
 	int y, x;
+	int resY, resX;
 	int lastXPos;
 	int ch; 
-	getmaxyx(stdscr, y, x);
+	getmaxyx(stdscr, resY, resX);
 	setupColors();
-	WINDOW *bar = setupBar(y, x);
-	WINDOW *win = setupMainWindow(y, x);
+	WINDOW *bar = setupBar(resY, resX);
+	WINDOW *win = setupMainWindow(resY, resX);
 	Line *bufferHead = createBufferHead();
 	Line *currentLine = bufferHead;
 	
@@ -56,14 +57,23 @@ int main(int argc, char *argv[]) {
 		// Print out full file
 		else if (ch == ctrl('p')) {
 			Line *dog = bufferHead;
-			while (dog != NULL) {
+			int counter = 0;
+			while (dog != NULL && counter < resY-1) {
 				wprintw(win, "%s\n", dog->data);
 				dog = dog->next;
+				counter++;
 			}
+			currentLine = bufferHead;
+			wmove(win, 0, 0);
+			getyx(win, y, x);
+		}
+		// Print ascii value of character under cursor
+		else if (ch == ctrl('d')) {
+			wprintw(win, "%d", currentLine->data[x]);
 		}
 		// Arrow keys
 		else if (ch == KEY_UP) {
-			if (y > 0) {
+			if (currentLine->prev != NULL) {
 				currentLine = currentLine->prev;
 				wmove(win, y-1, 0);
 				getyx(win, y, x);
@@ -72,7 +82,7 @@ int main(int argc, char *argv[]) {
 					getyx(win, y, x);
 				}
 			}
-		}
+	}
 		else if (ch == KEY_DOWN) {
 			if (currentLine->next != NULL) {
 				currentLine = currentLine->next;
