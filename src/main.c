@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 					getyx(win, y, x);
 				}
 			}
-	}
+		}
 		else if (ch == KEY_DOWN) {
 			if (currentLine->next != NULL) {
 				currentLine = currentLine->next;

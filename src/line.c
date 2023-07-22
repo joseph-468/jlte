@@ -2,8 +2,6 @@
 #include <string.h>
 #include "../include/line.h"
 
-struct Line;
-
 void freeAllLines(Line *bufferHead) {
 	bufferHead->length = 2;
 	free(bufferHead->data);
