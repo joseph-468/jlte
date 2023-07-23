@@ -14,9 +14,10 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	char *currentFile = NULL;
-	int y, x;
 	int resY, resX;
+	int y, x;
 	int lastXPos;
+	int realX = 0;
 	int ch; 
 	getmaxyx(stdscr, resY, resX);
 	setupColors();
@@ -65,20 +66,34 @@ int main(int argc, char *argv[]) {
 			}
 			currentLine = bufferHead;
 			wmove(win, 0, 0);
+			realX = 0;
 			getyx(win, y, x);
 		}
 		// Print ascii value of character under cursor
 		else if (ch == ctrl('d')) {
-			wprintw(win, "%d", currentLine->data[x]);
+			wprintw(win, "%d", currentLine->data[realX]);
 		}
 		// Arrow keys
 		else if (ch == KEY_UP) {
 			if (currentLine->prev != NULL) {
 				currentLine = currentLine->prev;
 				wmove(win, y-1, 0);
+				realX = 0;
 				getyx(win, y, x);
-				while (currentLine->data[x] != '\0' && x != lastXPos) {
-					wmove(win, y, x+1);
+				while (currentLine->data[realX] != '\0' && x != lastXPos) {
+					if (currentLine->data[realX] == 9) {
+						for (int i = 0; i < TABSIZE; i++) {
+							wmove(win, y, x-1);
+							getyx(win, y, x);
+							if (x == lastXPos) {
+								break;
+							}
+						}
+					}
+					else {
+						wmove(win, y, x+1);
+					}
+					realX += 1;
 					getyx(win, y, x);
 				}
 			}
@@ -87,41 +102,68 @@ int main(int argc, char *argv[]) {
 			if (currentLine->next != NULL) {
 				currentLine = currentLine->next;
 				wmove(win, y+1, 0);
+				realX = 0;
 				getyx(win, y, x);
-				while (currentLine->data[x] != '\0' && x != lastXPos) {
-					wmove(win, y, x+1);
+				while (currentLine->data[realX] != '\0' && x != lastXPos) {
+					if (currentLine->data[realX] == 9) {
+						for (int i = 0; i < TABSIZE; i++) {
+							wmove(win, y, x+1);
+							getyx(win, y, x);
+							if (x == lastXPos) {
+								break;
+							}
+						}
+					}
+					else {
+						wmove(win, y, x+1);
+					}
+					realX += 1;
 					getyx(win, y, x);
 				}
 			}
 		}
 		else if (ch == KEY_LEFT) {
 			if (x > 0) {
-				wmove(win, y, x-1);
+				if (currentLine->data[realX-1] == 9) {
+					wmove(win, y, x-TABSIZE);
+					realX -= 1;
+				}
+				else {
+					wmove(win, y, x-1);
+					realX -= 1;
+				}
 			}
 			lastXPos = x;
 		}
 		else if (ch == KEY_RIGHT) {
-			if (currentLine->data[x] != '\0') {
-				wmove(win, y, x+1);
+			if (currentLine->data[realX] != '\0') {
+				if (currentLine->data[realX] == 9) {
+					wmove(win, y, x+TABSIZE);
+					realX += 1;
+				} 
+				else {
+					wmove(win, y, x+1);
+					realX += 1;
+				}
 			}
 			lastXPos = x;
 		}
 		// Backspace
 		else if (ch == KEY_BACKSPACE) {
 			// Order between resizing and inserting data matters
-			currentLine->data[x-1] = '\0';
+			currentLine->data[realX-1] = '\0';
 			resizeLine(currentLine);
 			mvwdelch(win, y, x-1);
 		}
 		// Creates new line (Enter key)
 		else if (ch == 10) {
 			// Copy text that will go on new line and remove from current line
-			int newLineSize = strlen(currentLine->data+x);
+			int newLineSize = strlen(currentLine->data+realX);
 			char *newLineText = malloc(newLineSize+1);
 			if (newLineText != NULL) {
 				if (newLineSize > 0) {
-					strcpy(newLineText, currentLine->data+x);
-					memset(currentLine->data+x, '\0', newLineSize);
+					strcpy(newLineText, currentLine->data+realX);
+					memset(currentLine->data+realX, '\0', newLineSize);
 					setSize(currentLine, strlen(currentLine->data));
 				}
 				// Put new line text in new line
@@ -139,6 +181,7 @@ int main(int argc, char *argv[]) {
 					tempCurrentLine = tempCurrentLine->next;
 				}
 				wmove(win, y+1, 0);
+				realX = 0;
 			}
 		}
 		// Regular characters
@@ -146,18 +189,20 @@ int main(int argc, char *argv[]) {
 			lastXPos = x+1;
 			// Order between resizing and inserting data matters
 			resizeLine(currentLine);
-			if (currentLine->data[x] != '\0') {
+			if (currentLine->data[realX] != '\0') {
 				int arrayEnd = strlen(currentLine->data)-1;
 				for (int i = arrayEnd; i >= x; i--) {
 					currentLine->data[i+1] = currentLine->data[i];
 				}
-				currentLine->data[x] = ch;
+				currentLine->data[realX] = ch;
 				mvwprintw(win, y, 0, "%s", currentLine->data);
 				wmove(win, y, x+1);
+				realX += 1;
 			}
 			else {
-				currentLine->data[x] = ch;
+				currentLine->data[realX] = ch;
 				mvwprintw(win, y, x, "%c", ch);
+				realX += 1;
 			}
 		}
 		wrefresh(win);
