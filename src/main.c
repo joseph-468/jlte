@@ -59,10 +59,25 @@ int main(int argc, char *argv[]) {
 		else if (ch == ctrl('p')) {
 			Line *dog = bufferHead;
 			int counter = 0;
+			int xCounter = 0;
 			while (dog != NULL && counter < resY-1) {
-				wprintw(win, "%s\n", dog->data);
+				for (int i = 0; i < strlen(dog->data); i++) {
+					if (dog->data[i] == 9) {
+						int xPos = xCounter;
+						for (int j = 0; j < TABSIZE-xPos%TABSIZE; j++) {
+							wprintw(win, " ");
+							xCounter += 1;
+						}
+					}
+					else {
+						wprintw(win, "%c", dog->data[i]);
+						xCounter += 1;
+					}
+				}
+				wprintw(win, "\n");
 				dog = dog->next;
 				counter++;
+				xCounter = 0;
 			}
 			currentLine = bufferHead;
 			wmove(win, 0, 0);
@@ -71,7 +86,7 @@ int main(int argc, char *argv[]) {
 		}
 		// Print ascii value of character under cursor
 		else if (ch == ctrl('d')) {
-			wprintw(win, "%d", currentLine->data[realX]);
+			wprintw(win, "%d", currentLine->data[x]);
 		}
 		// Arrow keys
 		else if (ch == KEY_UP) {
@@ -82,12 +97,11 @@ int main(int argc, char *argv[]) {
 				getyx(win, y, x);
 				while (currentLine->data[realX] != '\0' && x != lastXPos) {
 					if (currentLine->data[realX] == 9) {
-						for (int i = 0; i < TABSIZE; i++) {
-							wmove(win, y, x-1);
-							getyx(win, y, x);
-							if (x == lastXPos) {
-								break;
-							}
+						if (x+(TABSIZE-x%TABSIZE) > lastXPos) {
+							break;
+						}
+						else {
+							wmove(win, y, x+(TABSIZE-x%TABSIZE));
 						}
 					}
 					else {
@@ -106,12 +120,11 @@ int main(int argc, char *argv[]) {
 				getyx(win, y, x);
 				while (currentLine->data[realX] != '\0' && x != lastXPos) {
 					if (currentLine->data[realX] == 9) {
-						for (int i = 0; i < TABSIZE; i++) {
-							wmove(win, y, x+1);
-							getyx(win, y, x);
-							if (x == lastXPos) {
-								break;
-							}
+						if (x+(TABSIZE-x%TABSIZE) > lastXPos) {
+							break;
+						}
+						else {
+							wmove(win, y, x+(TABSIZE-x%TABSIZE));
 						}
 					}
 					else {
@@ -125,7 +138,22 @@ int main(int argc, char *argv[]) {
 		else if (ch == KEY_LEFT) {
 			if (x > 0) {
 				if (currentLine->data[realX-1] == 9) {
-					wmove(win, y, x-TABSIZE);
+					int position = 0;
+					int latestTab = 0;
+					for (int i = 0; position < x; i++) {
+						if (currentLine->data[i] == '\0') {
+							break;
+						}
+						if (currentLine->data[i] == 9) {
+							latestTab = TABSIZE-position%TABSIZE;
+							position += TABSIZE-position%TABSIZE;
+						}
+						else {
+							position += 1;
+						}
+					}
+					wmove(win, y, position-latestTab);
+					getyx(win, y, x);
 					realX -= 1;
 				}
 				else {
@@ -133,12 +161,13 @@ int main(int argc, char *argv[]) {
 					realX -= 1;
 				}
 			}
+			getyx(win, y, x);
 			lastXPos = x;
 		}
 		else if (ch == KEY_RIGHT) {
 			if (currentLine->data[realX] != '\0') {
 				if (currentLine->data[realX] == 9) {
-					wmove(win, y, x+TABSIZE);
+					wmove(win, y, x+(TABSIZE-x%TABSIZE));
 					realX += 1;
 				} 
 				else {
@@ -146,6 +175,7 @@ int main(int argc, char *argv[]) {
 					realX += 1;
 				}
 			}
+			getyx(win, y, x);
 			lastXPos = x;
 		}
 		// Backspace
@@ -191,7 +221,7 @@ int main(int argc, char *argv[]) {
 			resizeLine(currentLine);
 			if (currentLine->data[realX] != '\0') {
 				int arrayEnd = strlen(currentLine->data)-1;
-				for (int i = arrayEnd; i >= x; i--) {
+				for (int i = arrayEnd; i >= realX; i--) {
 					currentLine->data[i+1] = currentLine->data[i];
 				}
 				currentLine->data[realX] = ch;
