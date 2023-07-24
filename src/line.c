@@ -54,6 +54,7 @@ void insertLineAfter(Line *currentLine) {
 	memset(newLine->data, '\0', newLine->length);
 	if (currentLine->next != NULL) {
 		newLine->next = currentLine->next;
+		currentLine->next->prev = newLine;
 	}
 	else {
 		newLine->next = NULL;
@@ -69,6 +70,7 @@ void insertLineBefore(Line *currentLine) {
 	memset(newLine->data, '\0', newLine->length);
 	if (currentLine->prev != NULL) {
 		newLine->prev = currentLine->prev;
+		currentLine->prev->next = newLine;
 	}
 	else {
 		newLine->prev = NULL;

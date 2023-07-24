@@ -14,19 +14,18 @@ int main(int argc, char *argv[]) {
 		endwin();
 		return -1;
 	}
+	int resY = 0, resX = 0;
 	char *currentFile = NULL;
-	int resY, resX;
-	int y, x;
-	int lastXPos;
+	int y = 0, x = 0;
+	int lastXPos = 0;
 	int realX = 0;
-	int ch; 
+	int ch = '\0'; 
 	getmaxyx(stdscr, resY, resX);
 	setupColors();
 	WINDOW *bar = setupBar(resY, resX);
 	WINDOW *win = setupMainWindow(resY, resX);
 	Line *bufferHead = createBufferHead();
 	Line *currentLine = bufferHead;
-	
 	// Open file from command line args	
 	if (argc == 2) {
 		currentFile = openFileFromName(argv[1], &currentLine, bufferHead, win, bar);
@@ -162,53 +161,11 @@ int main(int argc, char *argv[]) {
 		}
 		// Enter (new line)
 		else if (ch == 10) {
-			// Copy text that will go on new line and remove from current line
-			int newLineSize = strlen(currentLine->data+realX);
-			char *newLineText = malloc(newLineSize+1);
-			if (newLineText != NULL) {
-				if (newLineSize > 0) {
-					strcpy(newLineText, currentLine->data+realX);
-					memset(currentLine->data+realX, '\0', newLineSize);
-					setSize(currentLine, strlen(currentLine->data));
-				}
-				// Put new line text in new line
-				insertLineAfter(currentLine);
-				currentLine = currentLine->next;
-				if (newLineSize > 0) {
-					setSize(currentLine, newLineSize);
-					strcpy(currentLine->data, newLineText);
-				}
-				free(newLineText);
-				// Print new buffer
-				Line *tempCurrentLine = currentLine;
-				while (tempCurrentLine != NULL) {
-					wprintw(win, "\n%s", tempCurrentLine->data);
-					tempCurrentLine = tempCurrentLine->next;
-				}
-				wmove(win, y+1, 0);
-				realX = 0;
-			}
+			createNewLine(&currentLine, win, &realX, y);
 		}
 		// Regular characters
 		else if (ch >= 32 && ch <= 256) {
-			lastXPos = x+1;
-			// Order between resizing and inserting data matters
-			resizeLine(currentLine);
-			if (currentLine->data[realX] != '\0') {
-				int arrayEnd = strlen(currentLine->data)-1;
-				for (int i = arrayEnd; i >= realX; i--) {
-					currentLine->data[i+1] = currentLine->data[i];
-				}
-				currentLine->data[realX] = ch;
-				mvwprintw(win, y, 0, "%s", currentLine->data);
-				wmove(win, y, x+1);
-				realX += 1;
-			}
-			else {
-				currentLine->data[realX] = ch;
-				mvwprintw(win, y, x, "%c", ch);
-				realX += 1;
-			}
+			insertCharacter(currentLine, win, ch, &realX, &lastXPos, x, y);
 		}
 		wrefresh(win);
 	}
