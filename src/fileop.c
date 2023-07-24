@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../include/line.h"
 
+#define ctrl(x) ((x) & 0x1f)
 #define ASCII_ENTER 10
 
 char * openFileFromName(char fileName[], Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) {
@@ -74,7 +75,12 @@ char * openFile(Line **currentLine, Line *bufferHead, WINDOW *win, WINDOW *bar) 
 	while (1) {
 		ch = wgetch(bar);
 		getyx(bar, y, x);
-		if (ch == ASCII_ENTER) {
+
+		if (ch == ctrl('c')) {
+			endwin();
+			exit(0);
+		}
+		else if (ch == ASCII_ENTER) {
 			return openFileFromName(fileName, currentLine, bufferHead, win, bar);
 		}
 		else if (ch == KEY_BACKSPACE) {

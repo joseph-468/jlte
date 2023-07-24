@@ -4,6 +4,7 @@
 #include "../include/setup.h"
 #include "../include/line.h"
 #include "../include/fileop.h"
+#include "../include/bufferop.h"
 
 #define ctrl(x) ((x) & 0x1f)
 
@@ -29,64 +30,38 @@ int main(int argc, char *argv[]) {
 	// Open file from command line args	
 	if (argc == 2) {
 		currentFile = openFileFromName(argv[1], &currentLine, bufferHead, win, bar);
+		if (currentFile != NULL) {
+			printFullBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
+		}
 	}
 	
 	// Main loop
 	while (1) {
+		// Get key pressed and cursor position
 		ch = wgetch(win);
 		getyx(win, y, x);
+
+		// Exit program
+		if (ch == ctrl('c')) {
+			endwin();
+			exit(0);
+		}
 		// Open file and free old filename
-		if (ch == ctrl('o')) {
+		else if (ch == ctrl('o')) {
 			char *tempCurrentFile = currentFile;
 			currentFile = openFile(&currentLine, bufferHead, win, bar);
 			if (currentFile != NULL) {
 				free(tempCurrentFile);
+				printFullBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
 			}
 		} 
+		// Save file
 		else if (ch == ctrl('s')) {
 			saveFile(currentFile, bufferHead, win, bar);
 		}
-		else if (ch == ctrl('c')) {
-			endwin();
-			return 0;
-		}
-		// Test line insertion
-		else if (ch == ctrl('t')) {
-			insertLineAfter(currentLine);
-			currentLine = currentLine->next;
-		}
 		// Print out full file
 		else if (ch == ctrl('p')) {
-			Line *dog = bufferHead;
-			int counter = 0;
-			int xCounter = 0;
-			while (dog != NULL && counter < resY-1) {
-				for (int i = 0; i < strlen(dog->data); i++) {
-					if (dog->data[i] == 9) {
-						int xPos = xCounter;
-						for (int j = 0; j < TABSIZE-xPos%TABSIZE; j++) {
-							wprintw(win, " ");
-							xCounter += 1;
-						}
-					}
-					else {
-						wprintw(win, "%c", dog->data[i]);
-						xCounter += 1;
-					}
-				}
-				wprintw(win, "\n");
-				dog = dog->next;
-				counter++;
-				xCounter = 0;
-			}
-			currentLine = bufferHead;
-			wmove(win, 0, 0);
-			realX = 0;
-			getyx(win, y, x);
-		}
-		// Print ascii value of character under cursor
-		else if (ch == ctrl('d')) {
-			wprintw(win, "%d", currentLine->data[x]);
+			printFullBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
 		}
 		// Arrow keys
 		else if (ch == KEY_UP) {
@@ -185,7 +160,7 @@ int main(int argc, char *argv[]) {
 			resizeLine(currentLine);
 			mvwdelch(win, y, x-1);
 		}
-		// Creates new line (Enter key)
+		// Enter (new line)
 		else if (ch == 10) {
 			// Copy text that will go on new line and remove from current line
 			int newLineSize = strlen(currentLine->data+realX);
@@ -238,8 +213,7 @@ int main(int argc, char *argv[]) {
 		wrefresh(win);
 	}
 	
-	// Important end stuff
-	getch();
+	// Close program (unused)
 	endwin();
-	return 0;
+	exit(0);
 }
