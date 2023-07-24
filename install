@@ -2,7 +2,7 @@
 
 INSTALL_DIR="/usr/local/bin"
 
-gcc src/main.c src/line.c src/setup.c src/fileop.c -lncurses -o TextEditor
+gcc src/main.c src/line.c src/setup.c src/fileop.c src/bufferop.c -lncurses -o TextEditor
 
 cp TextEditor "$INSTALL_DIR"
 
