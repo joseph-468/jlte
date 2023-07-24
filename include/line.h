@@ -11,6 +11,7 @@ typedef struct Line {
 void freeAllLines(Line *bufferHead);
 void setSize(Line *currentLine, long size);
 void resizeLine(Line *currentLine); 
+void removeLine(Line *targetLine);
 void insertLineAfter(Line *currentLine);
 void insertLineBefore(Line *currentLine);
 

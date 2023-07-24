@@ -9,28 +9,30 @@
 #define ctrl(x) ((x) & 0x1f)
 
 int main(int argc, char *argv[]) {
-	// Start ncurses and create important variables
+	// Start ncurses
 	if (startNcurses() != 0) {
 		endwin();
 		return -1;
 	}
-	int resY = 0, resX = 0;
+	// Initialize important variables
 	char *currentFile = NULL;
+	int resY = 0, resX = 0;
 	int y = 0, x = 0;
 	int lastXPos = 0;
 	int realX = 0;
 	int ch = '\0'; 
+	// Setup ncurses windows and buffer
 	getmaxyx(stdscr, resY, resX);
 	setupColors();
 	WINDOW *bar = setupBar(resY, resX);
 	WINDOW *win = setupMainWindow(resY, resX);
 	Line *bufferHead = createBufferHead();
-	Line *currentLine = bufferHead;
+	Line *currentLine = bufferHead;	
 	// Open file from command line args	
 	if (argc == 2) {
 		currentFile = openFileFromName(argv[1], &currentLine, bufferHead, win, bar);
 		if (currentFile != NULL) {
-			printFullBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
+			printBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
 		}
 	}
 	
@@ -51,7 +53,7 @@ int main(int argc, char *argv[]) {
 			currentFile = openFile(&currentLine, bufferHead, win, bar);
 			if (currentFile != NULL) {
 				free(tempCurrentFile);
-				printFullBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
+				printBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
 			}
 		} 
 		// Save file
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
 		}
 		// Print out full file
 		else if (ch == ctrl('p')) {
-			printFullBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
+			printBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
 		}
 		// Arrow keys
 		else if (ch == KEY_UP) {
@@ -155,9 +157,21 @@ int main(int argc, char *argv[]) {
 		// Backspace
 		else if (ch == KEY_BACKSPACE) {
 			// Order between resizing and inserting data matters
-			currentLine->data[realX-1] = '\0';
-			resizeLine(currentLine);
-			mvwdelch(win, y, x-1);
+			if (strlen(currentLine->data) > 0 && realX > 0) {
+				int index = realX-1;
+				while (currentLine->data[index] != '\0') {
+					currentLine->data[index] = currentLine->data[index+1];
+					index++;
+				}
+				resizeLine(currentLine);
+				mvwdelch(win, y, x-1);
+				realX --;
+			}
+			else if (strlen(currentLine->data) == 0) {
+				Line *previousLine = currentLine->prev;
+				removeLine(currentLine);
+				currentLine = previousLine;	
+			}
 		}
 		// Enter (new line)
 		else if (ch == 10) {

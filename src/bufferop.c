@@ -3,7 +3,7 @@
 #include <string.h>
 #include "../include/line.h"
 
-void printFullBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int resY, int realX, int x, int y) {
+void printBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int resY, int realX, int x, int y) {
 	Line *currentPrintLine = bufferHead;
 	int counter = 0;
 	int xCounter = 0;

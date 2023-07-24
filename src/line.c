@@ -47,6 +47,13 @@ void resizeLine(Line *currentLine) {
 	}
 }
 
+void removeLine(Line *targetLine) {
+	targetLine->prev->next = targetLine->next;
+	targetLine->next->prev = targetLine->prev;
+	free(targetLine->data);
+	free(targetLine);
+}
+
 void insertLineAfter(Line *currentLine) {
 	Line *newLine = malloc(sizeof(Line));
 	newLine->length = 2;
