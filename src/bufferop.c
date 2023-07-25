@@ -7,13 +7,32 @@
 void backspace(Line **currentLine, WINDOW *win, int *realX, int x, int y) {
 	if (strlen((*currentLine)->data) > 0 && *realX > 0) {
 		int index = *realX-1;
+		short isTab = ((*currentLine)->data[index] == 9) ? 1 : 0;
 		while ((*currentLine)->data[index] != '\0') {
 			(*currentLine)->data[index] = (*currentLine)->data[index+1];
 			index++;
 		}
-		resizeLine((*currentLine));
-		mvwdelch(win, y, x-1);
-		*realX = *realX-1;
+		resizeLine((*currentLine));	
+		if (isTab == 1) {
+			wmove(win, y, 0);
+			wclrtoeol(win);
+			for (int i = 0; i < strlen((*currentLine)->data); i++) {
+				if ((*currentLine)->data[i] == 9) {
+					for (int j = 0; j < TABSIZE-x%TABSIZE; j++) {
+						wprintw(win, " ");
+					}
+				}
+				else {
+					wprintw(win, "%c", (*currentLine)->data[i]);
+				}
+			}
+			wmove(win, y, x-TABSIZE-x%TABSIZE);
+			*realX = *realX-1;
+		}
+		else {
+			mvwdelch(win, y, x-1);
+			*realX = *realX-1;
+		}
 	}
 	else if (*realX == 0 && (*currentLine)->prev != NULL) {
 		int afterPosX;

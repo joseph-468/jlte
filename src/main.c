@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 			createNewLine(&currentLine, win, &realX, &lastXPos, y);
 		}
 		// Regular characters
-		else if (ch > 32 && ch <= 256 || ch == 9) {
+		else if (ch > 32 && ch < 127 || ch == 9) {
 			insertCharacter(currentLine, win, ch, &realX, &lastXPos, x, y);
 		}
 		wrefresh(win);
