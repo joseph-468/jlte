@@ -3,25 +3,23 @@
 #include <string.h>
 #include "../include/line.h"
 
-int startNcurses() {
+void startNcurses() {
 	initscr();
-	cbreak();
 	noecho();
+	nocbreak();
 	raw();
-	// Close program if it doesn't support enough colors
-	if (!has_colors || !can_change_color()) {
-		return -1;
+	// Program runs in black and white if it can't change colors
+	if (has_colors || can_change_color()) {
+		start_color();
 	}
-	start_color();
-	return 0;
 }
 
 void setupColors() {
-	init_color(17, 145, 149, 153);
-	init_color(18, 828, 831, 851);
-	init_color(19, 377, 341, 439);
-	init_pair(1, 18, 17);
-	init_pair(2, 18, 19);
+	init_color(COLOR_BLACK, 145, 149, 153);
+	init_color(COLOR_BLACK+1, 828, 831, 851);
+	init_color(COLOR_BLACK+2, 377, 341, 439);
+	init_pair(1, COLOR_BLACK+1, COLOR_BLACK);
+	init_pair(2, COLOR_BLACK+1, COLOR_BLACK+2);
 }
 
 WINDOW * setupMainWindow(int y, int x) {

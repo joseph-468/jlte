@@ -3,7 +3,7 @@
 
 #include "../include/line.h"
 
-int startNcurses();
+void startNcurses();
 void setupColors();
 WINDOW * setupMainWindow(int y, int x);
 WINDOW * setupBar(int y, int x);

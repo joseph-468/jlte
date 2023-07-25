@@ -9,11 +9,7 @@
 #define ctrl(x) ((x) & 0x1f)
 
 int main(int argc, char *argv[]) {
-	// Start ncurses
-	if (startNcurses() != 0) {
-		endwin();
-		return -1;
-	}
+	startNcurses();
 	// Initialize important variables
 	char *currentFile = NULL;
 	int resY = 0, resX = 0;
