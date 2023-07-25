@@ -1,0 +1,12 @@
+#!/bin/bash
+
+INSTALL_DIR="/usr/local/bin"
+
+rm "$INSTALL_DIR/jlte"
+
+if grep -qxF "export PATH=\"$INSTALL_DIR:\$PATH\"" ~/.bashrc; then
+  sed -i "\#export PATH=\"$INSTALL_DIR:\\\$PATH\"#d" ~/.bashrc
+fi
+
+echo "Uninstallation complete."
+

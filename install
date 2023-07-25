@@ -1,12 +1,14 @@
 #!/bin/bash
 
+gcc src/main.c src/line.c src/setup.c src/fileop.c src/bufferop.c -lncurses -o jlte
+
 INSTALL_DIR="/usr/local/bin"
 
-gcc src/main.c src/line.c src/setup.c src/fileop.c src/bufferop.c -lncurses -o TextEditor
-
-cp TextEditor "$INSTALL_DIR"
+cp jlte "$INSTALL_DIR"
 
 if ! grep -qxF "export PATH=\"$INSTALL_DIR:\$PATH\"" ~/.bashrc; then
   echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> ~/.bashrc
   source ~/.bashrc
 fi
+
+echo "Installation complete."
