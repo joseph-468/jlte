@@ -79,7 +79,7 @@ void printBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int resY, in
 	getyx(win, y, x);
 }
 
-void createNewLine(Line **currentLine, WINDOW *win, int *realX, int y) {
+void createNewLine(Line **currentLine, WINDOW *win, int *realX, int *lastXPos, int y) {
 	// Copy text that will go on new line and remove from current line
 	int newLineSize = strlen((*currentLine)->data+*realX);
 	char *newLineText = malloc(newLineSize+1);
@@ -105,6 +105,7 @@ void createNewLine(Line **currentLine, WINDOW *win, int *realX, int y) {
 		}
 		wmove(win, y+1, 0);
 		*realX = 0;
+		*lastXPos = 0;
 	}
 }
 
@@ -119,7 +120,8 @@ void insertCharacter(Line *currentLine, WINDOW *win, int ch, int *realX, int *la
 		}
 		currentLine->data[*realX] = ch;
 		mvwprintw(win, y, 0, "%s", currentLine->data);
-		wmove(win, y, x+1);
+		if (ch == 9) wmove(win, y, x+TABSIZE-x%TABSIZE);
+		else wmove(win, y, x+1);
 		*realX += 1;
 	}
 	else {

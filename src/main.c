@@ -133,6 +133,11 @@ int main(int argc, char *argv[]) {
 					realX -= 1;
 				}
 			}
+			else if (strlen(currentLine->data) && currentLine->prev != NULL) {
+				currentLine = currentLine->prev;
+				wmove(win, y-1, strlen(currentLine->data));
+				realX = strlen(currentLine->data);
+			}
 			getyx(win, y, x);
 			lastXPos = x;
 		}
@@ -147,6 +152,13 @@ int main(int argc, char *argv[]) {
 					realX += 1;
 				}
 			}
+			else {
+				if (currentLine->next != NULL) {
+					currentLine = currentLine->next;
+					wmove(win, y+1, 0);
+					realX = 0;
+				}
+			}
 			getyx(win, y, x);
 			lastXPos = x;
 		}
@@ -156,10 +168,10 @@ int main(int argc, char *argv[]) {
 		}
 		// Enter (new line)
 		else if (ch == 10) {
-			createNewLine(&currentLine, win, &realX, y);
+			createNewLine(&currentLine, win, &realX, &lastXPos, y);
 		}
 		// Regular characters
-		else if (ch >= 32 && ch <= 256) {
+		else if (ch > 32 && ch <= 256 || ch == 9) {
 			insertCharacter(currentLine, win, ch, &realX, &lastXPos, x, y);
 		}
 		wrefresh(win);
