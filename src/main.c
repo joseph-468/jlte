@@ -156,22 +156,7 @@ int main(int argc, char *argv[]) {
 		}
 		// Backspace
 		else if (ch == KEY_BACKSPACE) {
-			// Order between resizing and inserting data matters
-			if (strlen(currentLine->data) > 0 && realX > 0) {
-				int index = realX-1;
-				while (currentLine->data[index] != '\0') {
-					currentLine->data[index] = currentLine->data[index+1];
-					index++;
-				}
-				resizeLine(currentLine);
-				mvwdelch(win, y, x-1);
-				realX --;
-			}
-			else if (strlen(currentLine->data) == 0) {
-				Line *previousLine = currentLine->prev;
-				removeLine(currentLine);
-				currentLine = previousLine;	
-			}
+			backspace(&currentLine, win, &realX, x, y);
 		}
 		// Enter (new line)
 		else if (ch == 10) {

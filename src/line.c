@@ -48,8 +48,12 @@ void resizeLine(Line *currentLine) {
 }
 
 void removeLine(Line *targetLine) {
-	targetLine->prev->next = targetLine->next;
-	targetLine->next->prev = targetLine->prev;
+	if (targetLine->prev) {
+		targetLine->prev->next = targetLine->next;
+	}
+	if (targetLine->next) {
+		targetLine->next->prev = targetLine->prev;
+	}
 	free(targetLine->data);
 	free(targetLine);
 }

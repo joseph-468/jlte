@@ -3,6 +3,53 @@
 #include <string.h>
 #include "../include/line.h"
 
+
+void backspace(Line **currentLine, WINDOW *win, int *realX, int x, int y) {
+	if (strlen((*currentLine)->data) > 0 && *realX > 0) {
+		int index = *realX-1;
+		while ((*currentLine)->data[index] != '\0') {
+			(*currentLine)->data[index] = (*currentLine)->data[index+1];
+			index++;
+		}
+		resizeLine((*currentLine));
+		mvwdelch(win, y, x-1);
+		*realX = *realX-1;
+	}
+	else if (*realX == 0 && (*currentLine)->prev != NULL) {
+		int afterPosX;
+		int afterPosY;
+		Line *previousLine = (*currentLine)->prev;
+		if (strlen((*currentLine)->data) > 0) {
+			char *currentLineData = malloc(strlen((*currentLine)->data)+1);
+			strcpy(currentLineData, (*currentLine)->data);
+			removeLine((*currentLine));
+			*currentLine = previousLine;	
+			afterPosX = strlen((*currentLine)->data);
+			setSize((*currentLine), strlen((*currentLine)->data)+strlen(currentLineData));
+			strcat((*currentLine)->data, currentLineData);
+			free(currentLineData);
+		}
+		else {
+			removeLine((*currentLine));
+			*currentLine = previousLine;	
+			afterPosX = strlen((*currentLine)->data);
+		}
+		// Print new buffer
+		afterPosY = y-1;
+		wmove(win, afterPosY, x);
+		Line *tempCurrentLine = (*currentLine);
+		while (tempCurrentLine != NULL) {
+			wprintw(win, "%s\n", tempCurrentLine->data);
+			tempCurrentLine = tempCurrentLine->next;
+		}
+		getyx(win, y, x);
+		wmove(win, y, 0);
+		wclrtoeol(win);
+		wmove(win, afterPosY, afterPosX);
+		*realX = afterPosX;
+	}
+}
+
 void printBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int resY, int realX, int x, int y) {
 	Line *currentPrintLine = bufferHead;
 	int counter = 0;
