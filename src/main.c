@@ -7,6 +7,8 @@
 #include "../include/bufferop.h"
 
 #define ctrl(x) ((x) & 0x1f)
+#undef KEY_ENTER
+#define KEY_ENTER 10
 
 int main(int argc, char *argv[]) {
 	startNcurses();
@@ -62,112 +64,23 @@ int main(int argc, char *argv[]) {
 		}
 		// Arrow keys
 		else if (ch == KEY_UP) {
-			if (currentLine->prev != NULL) {
-				currentLine = currentLine->prev;
-				wmove(win, y-1, 0);
-				realX = 0;
-				getyx(win, y, x);
-				while (currentLine->data[realX] != '\0' && x != lastXPos) {
-					if (currentLine->data[realX] == 9) {
-						if (x+(TABSIZE-x%TABSIZE) > lastXPos) {
-							break;
-						}
-						else {
-							wmove(win, y, x+(TABSIZE-x%TABSIZE));
-						}
-					}
-					else {
-						wmove(win, y, x+1);
-					}
-					realX += 1;
-					getyx(win, y, x);
-				}
-			}
+			moveUp(&currentLine, win, &realX, lastXPos, x, y);
 		}
 		else if (ch == KEY_DOWN) {
-			if (currentLine->next != NULL) {
-				currentLine = currentLine->next;
-				wmove(win, y+1, 0);
-				realX = 0;
-				getyx(win, y, x);
-				while (currentLine->data[realX] != '\0' && x != lastXPos) {
-					if (currentLine->data[realX] == 9) {
-						if (x+(TABSIZE-x%TABSIZE) > lastXPos) {
-							break;
-						}
-						else {
-							wmove(win, y, x+(TABSIZE-x%TABSIZE));
-						}
-					}
-					else {
-						wmove(win, y, x+1);
-					}
-					realX += 1;
-					getyx(win, y, x);
-				}
-			}
-		}
-		else if (ch == KEY_LEFT) {
-			if (x > 0) {
-				if (currentLine->data[realX-1] == 9) {
-					int position = 0;
-					int latestTab = 0;
-					for (int i = 0; position < x; i++) {
-						if (currentLine->data[i] == '\0') {
-							break;
-						}
-						if (currentLine->data[i] == 9) {
-							latestTab = TABSIZE-position%TABSIZE;
-							position += TABSIZE-position%TABSIZE;
-						}
-						else {
-							position += 1;
-						}
-					}
-					wmove(win, y, position-latestTab);
-					getyx(win, y, x);
-					realX -= 1;
-				}
-				else {
-					wmove(win, y, x-1);
-					realX -= 1;
-				}
-			}
-			else if (strlen(currentLine->data) && currentLine->prev != NULL) {
-				currentLine = currentLine->prev;
-				wmove(win, y-1, strlen(currentLine->data));
-				realX = strlen(currentLine->data);
-			}
-			getyx(win, y, x);
-			lastXPos = x;
+			moveDown(&currentLine, win, &realX, lastXPos, x, y);
 		}
 		else if (ch == KEY_RIGHT) {
-			if (currentLine->data[realX] != '\0') {
-				if (currentLine->data[realX] == 9) {
-					wmove(win, y, x+(TABSIZE-x%TABSIZE));
-					realX += 1;
-				} 
-				else {
-					wmove(win, y, x+1);
-					realX += 1;
-				}
-			}
-			else {
-				if (currentLine->next != NULL) {
-					currentLine = currentLine->next;
-					wmove(win, y+1, 0);
-					realX = 0;
-				}
-			}
-			getyx(win, y, x);
-			lastXPos = x;
+			moveRight(&currentLine, win, &realX, &lastXPos, x, y);
+		}
+		else if (ch == KEY_LEFT) {
+			moveLeft(&currentLine, win, &realX, &lastXPos, x, y);
 		}
 		// Backspace
 		else if (ch == KEY_BACKSPACE) {
 			backspace(&currentLine, win, &realX, x, y);
 		}
-		// Enter (new line)
-		else if (ch == 10) {
+		// New line (enter)
+		else if (ch == KEY_ENTER) {
 			createNewLine(&currentLine, win, &realX, &lastXPos, y);
 		}
 		// Regular characters

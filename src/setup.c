@@ -9,7 +9,7 @@ void startNcurses() {
 	nocbreak();
 	raw();
 	// Program runs in black and white if it can't change colors
-	if (has_colors || can_change_color()) {
+	if (has_colors() && can_change_color()) {
 		start_color();
 	}
 }

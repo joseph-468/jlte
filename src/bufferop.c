@@ -3,6 +3,120 @@
 #include <string.h>
 #include "../include/line.h"
 
+void moveUp(Line **currentLine, WINDOW *win, int *realX, int lastXPos, int x, int y) {
+	if ((*currentLine)->prev != NULL) {
+		*currentLine = (*currentLine)->prev;
+		wmove(win, y-1, 0);
+		*realX = 0;
+		getyx(win, y, x);
+		while ((*currentLine)->data[*realX] != '\0' && x != lastXPos) {
+			if ((*currentLine)->data[*realX] == 9) {
+				if (x+(TABSIZE-x%TABSIZE) > lastXPos) {
+					break;
+				}
+				else {
+					wmove(win, y, x+(TABSIZE-x%TABSIZE));
+				}
+			}
+			else {
+				wmove(win, y, x+1);
+			}
+			*realX += 1;
+			getyx(win, y, x);
+		}
+	}
+}
+
+void moveDown(Line **currentLine, WINDOW *win, int *realX, int lastXPos, int x, int y) {
+	if ((*currentLine)->next != NULL) {
+		*currentLine = (*currentLine)->next;
+		wmove(win, y+1, 0);
+		*realX = 0;
+		getyx(win, y, x);
+		while ((*currentLine)->data[*realX] != '\0' && x != lastXPos) {
+			if ((*currentLine)->data[*realX] == 9) {
+				if (x+(TABSIZE-x%TABSIZE) > lastXPos) {
+					break;
+				}
+				else {
+					wmove(win, y, x+(TABSIZE-x%TABSIZE));
+				}
+			}
+			else {
+				wmove(win, y, x+1);
+			}
+			*realX += 1;
+			getyx(win, y, x);
+		}
+	}
+}
+
+void moveRight(Line **currentLine, WINDOW *win, int *realX, int *lastXPos, int x, int y) {
+	if ((*currentLine)->data[*realX] != '\0') {
+		if ((*currentLine)->data[*realX] == 9) {
+			wmove(win, y, x+(TABSIZE-x%TABSIZE));
+			*realX += 1;
+		} 
+		else {
+			wmove(win, y, x+1);
+			*realX += 1;
+		}
+	}
+	else {
+		if ((*currentLine)->next != NULL) {
+			*currentLine = (*currentLine)->next;
+			wmove(win, y+1, 0);
+			*realX = 0;
+		}
+	}
+	getyx(win, y, x);
+	*lastXPos = x;
+}
+
+void moveLeft(Line **currentLine, WINDOW *win, int *realX, int *lastXPos, int x, int y) {
+	if (x > 0) {
+		if ((*currentLine)->data[*realX-1] == 9) {
+			int position = 0;
+			int latestTab = 0;
+			for (int i = 0; position < x; i++) {
+				if ((*currentLine)->data[i] == '\0') {
+					break;
+				}
+				if ((*currentLine)->data[i] == 9) {
+					latestTab = TABSIZE-position%TABSIZE;
+					position += TABSIZE-position%TABSIZE;
+				}
+				else {
+					position += 1;
+				}
+			}
+			wmove(win, y, position-latestTab);
+			getyx(win, y, x);
+			*realX -= 1;
+		}
+		else {
+			wmove(win, y, x-1);
+			*realX -= 1;
+		}
+	}
+	else if ((*currentLine)->prev != NULL) {
+		*currentLine = (*currentLine)->prev;
+		// Calculate line length with tabs
+		int length = 0;
+		for (int i = 0; i < strlen((*currentLine)->data); i++) {
+			if ((*currentLine)->data[i] == 9) {
+				length += TABSIZE;
+			}
+			else {
+				length += 1;
+			}
+		}
+		wmove(win, y-1, length);
+		*realX = strlen((*currentLine)->data);
+	}
+	getyx(win, y, x);
+	*lastXPos = x;
+}
 
 void backspace(Line **currentLine, WINDOW *win, int *realX, int x, int y) {
 	if (strlen((*currentLine)->data) > 0 && *realX > 0) {
