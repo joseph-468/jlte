@@ -184,6 +184,7 @@ void backspace(Line **currentLine, WINDOW *win, int *realX, int x, int y) {
 }
 
 void printBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int resY, int realX, int x, int y) {
+	wclear(win);
 	Line *currentPrintLine = bufferHead;
 	int counter = 0;
 	int xCounter = 0;

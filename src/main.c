@@ -39,8 +39,7 @@ int main(int argc, char *argv[]) {
 		// Get key pressed and cursor position
 		ch = wgetch(win);
 		getyx(win, y, x);
-
-		// Exit program
+		// Exit program (^C)
 		if (ch == ctrl('c')) {
 			endwin();
 			exit(0);
