@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/line.h"
+#include "../include/bufferop.h"
 
 void moveUp(Line **currentLine, WINDOW *win, int *realX, int lastXPos, int x, int y) {
 	if ((*currentLine)->prev != NULL) {
@@ -118,7 +119,7 @@ void moveLeft(Line **currentLine, WINDOW *win, int *realX, int *lastXPos, int x,
 	*lastXPos = x;
 }
 
-void backspace(Line **currentLine, WINDOW *win, int *realX, int x, int y) {
+void backspace(Line **currentLine, WINDOW *win, int leftOffset, int *realX, int x, int y) {
 	if (strlen((*currentLine)->data) > 0 && *realX > 0) {
 		int index = *realX-1;
 		short isTab = ((*currentLine)->data[index] == 9) ? 1 : 0;
@@ -183,12 +184,15 @@ void backspace(Line **currentLine, WINDOW *win, int *realX, int x, int y) {
 	}
 }
 
-void printBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int resY, int realX, int x, int y) {
+void printBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int *leftOffset, int resY, int realX, int x, int y) {
 	wclear(win);
 	Line *currentPrintLine = bufferHead;
 	int counter = 0;
 	int xCounter = 0;
+	printLineNumbers(bufferHead, win, leftOffset, 0, resY);
+	wmove(win, 0, 2);
 	while (currentPrintLine != NULL && counter < resY-1) {
+		wmove(win, counter, *leftOffset);
 		for (int i = 0; i < strlen(currentPrintLine->data); i++) {
 			if (currentPrintLine->data[i] == 9) {
 				int xPos = xCounter;
@@ -208,12 +212,58 @@ void printBuffer(Line **currentLine, Line *bufferHead, WINDOW *win, int resY, in
 		xCounter = 0;
 	}
 	*currentLine = bufferHead;
-	wmove(win, 0, 0);
+	wmove(win, 0, *leftOffset);
 	realX = 0;
 	getyx(win, y, x);
 }
 
-void createNewLine(Line **currentLine, WINDOW *win, int *realX, int *lastXPos, int y) {
+void printLineNumbers(Line *bufferHead, WINDOW *win, int *leftOffset, int resX, int resY) {
+	wattron(win, COLOR_PAIR(3));
+	// Find length of buffer
+	wmove(win, 0, 0);
+	int lineCount = 0;
+	int tempLineCount = 0;
+	int maxPadding = 0;
+	Line *currentLine = bufferHead;
+	while (currentLine != NULL) {
+		lineCount++;	
+		currentLine = currentLine->next;
+	}
+	tempLineCount = lineCount;
+	while(tempLineCount >= 10) {
+		tempLineCount /= 10;
+		maxPadding++;
+	}
+	*leftOffset = maxPadding+2;
+	// Print line numbers
+	int y, x;
+	int tempCounter = 0;
+	int padding = 0;
+	char paddingString[10] = {'\0'};
+	currentLine = bufferHead;
+	for (int i = 0; i < resY-1; i++) {
+		if (currentLine == NULL) {
+			break;
+		}
+		padding = 0;
+		tempCounter = i;
+		memset(paddingString, '\0', 10);
+		while(tempCounter >= 10) {
+			tempCounter /= 10;
+			padding++;
+		}	
+		for (int i = 0; i < maxPadding-padding; i++) {
+			paddingString[i] = ' ';
+		}
+		getyx(win, y, x);
+		wprintw(win, "%s%d ", paddingString, i);
+		wmove(win, y+1, 0);
+		currentLine = currentLine->next;
+	}
+	wattron(win, COLOR_PAIR(1));
+}
+
+void createNewLine(Line **currentLine, Line *bufferHead, WINDOW *win, int leftOffset, int *realX, int *lastXPos, int y, int resY) {
 	// Copy text that will go on new line and remove from current line
 	int newLineSize = strlen((*currentLine)->data+*realX);
 	char *newLineText = malloc(newLineSize+1);
@@ -232,12 +282,18 @@ void createNewLine(Line **currentLine, WINDOW *win, int *realX, int *lastXPos, i
 		}
 		free(newLineText);
 		// Print new buffer
+		char leftPadding[10] = {'\0'};
 		Line *tempCurrentLine = (*currentLine);
 		while (tempCurrentLine != NULL) {
-			wprintw(win, "\n%s", tempCurrentLine->data);
+			memset(leftPadding, '\0', 10);
+			for (int i = 0; i < leftOffset; i++) {
+				leftPadding[i] = ' ';
+			}
+			wprintw(win, "\n%s%s", leftPadding, tempCurrentLine->data); // Temporary, very inefficient
 			tempCurrentLine = tempCurrentLine->next;
 		}
-		wmove(win, y+1, 0);
+		printLineNumbers(bufferHead, win, &leftOffset, 0, resY);
+		wmove(win, y+1, leftOffset);
 		*realX = 0;
 		*lastXPos = 0;
 	}
@@ -264,3 +320,4 @@ void insertCharacter(Line *currentLine, WINDOW *win, int ch, int *realX, int *la
 		*realX += 1;
 	}
 }
+

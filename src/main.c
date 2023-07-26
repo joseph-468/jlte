@@ -14,10 +14,11 @@ int main(int argc, char *argv[]) {
 	startNcurses();
 	// Initialize important variables
 	char *currentFile = NULL;
+	int leftOffset = 1;
 	int resY = 0, resX = 0;
 	int y = 0, x = 0;
-	int lastXPos = 0;
 	int realX = 0;
+	int lastXPos = 0;
 	int ch = '\0'; 
 	// Setup ncurses windows and buffer
 	getmaxyx(stdscr, resY, resX);
@@ -30,10 +31,10 @@ int main(int argc, char *argv[]) {
 	if (argc == 2) {
 		currentFile = openFileFromName(argv[1], &currentLine, bufferHead, win, bar);
 		if (currentFile != NULL) {
-			printBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
+			printBuffer(&currentLine, bufferHead, win, &leftOffset, resY, realX, x, y);
 		}
 	}
-	
+
 	// Main loop
 	while (1) {
 		// Get key pressed and cursor position
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
 			currentFile = openFile(&currentLine, bufferHead, win, bar);
 			if (currentFile != NULL) {
 				free(tempCurrentFile);
-				printBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
+				printBuffer(&currentLine, bufferHead, win, &leftOffset, resY, realX, x, y);
 			}
 		} 
 		// Save file
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]) {
 		}
 		// Print out full file
 		else if (ch == ctrl('p')) {
-			printBuffer(&currentLine, bufferHead, win, resY, realX, x, y);
+			printBuffer(&currentLine, bufferHead, win, &leftOffset, resY, realX, x, y);
 		}
 		// Arrow keys
 		else if (ch == KEY_UP) {
@@ -76,11 +77,11 @@ int main(int argc, char *argv[]) {
 		}
 		// Backspace
 		else if (ch == KEY_BACKSPACE) {
-			backspace(&currentLine, win, &realX, x, y);
+			backspace(&currentLine, win, leftOffset, &realX, x, y);
 		}
 		// New line (enter)
 		else if (ch == KEY_ENTER) {
-			createNewLine(&currentLine, win, &realX, &lastXPos, y);
+			createNewLine(&currentLine, bufferHead, win, leftOffset, &realX, &lastXPos, y, resY);
 		}
 		// Regular characters
 		else if (ch > 32 && ch < 127 || ch == 9) {
