@@ -15,11 +15,13 @@ void startNcurses() {
 }
 
 void setupColors() {
-	init_color(COLOR_BLACK, 145, 149, 153);
-	init_color(COLOR_BLACK+1, 828, 831, 851);
-	init_color(COLOR_BLACK+2, 377, 341, 439);
+	init_color(COLOR_BLACK, 200, 200, 200);
+	init_color(COLOR_BLACK+1, 900, 900, 900);
+	init_color(COLOR_BLACK+2, 400, 400, 600);
+	init_color(COLOR_BLACK+3, 700, 700, 700);
 	init_pair(1, COLOR_BLACK+1, COLOR_BLACK);
 	init_pair(2, COLOR_BLACK+1, COLOR_BLACK+2);
+	init_pair(3, COLOR_BLACK+3, COLOR_BLACK);
 }
 
 WINDOW * setupMainWindow(int y, int x) {
